@@ -22,6 +22,7 @@ ekarigar-backend/logs/
 ekarigar-backend/.env
 ekarigar-backend/.env.*
 !ekarigar-backend/.env.example
+.env
 
 # ======================
 # Frontend (future - Next.js / React)
