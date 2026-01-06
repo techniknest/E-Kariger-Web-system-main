@@ -1,0 +1,70 @@
+# ======================
+# Global (entire system)
+# ======================
+node_modules/
+dist/
+build/
+coverage/
+logs/
+*.log
+.DS_Store
+
+# ======================
+# Backend (NestJS)
+# ======================
+ekarigar-backend/node_modules/
+ekarigar-backend/dist/
+ekarigar-backend/build/
+ekarigar-backend/coverage/
+ekarigar-backend/logs/
+
+# Env files (backend)
+ekarigar-backend/.env
+ekarigar-backend/.env.*
+!ekarigar-backend/.env.example
+
+# ======================
+# Frontend (future - Next.js / React)
+# ======================
+ekarigar-frontend/node_modules/
+ekarigar-frontend/.next/
+ekarigar-frontend/build/
+ekarigar-frontend/dist/
+
+# Env files (frontend)
+ekarigar-frontend/.env
+ekarigar-frontend/.env.*
+!ekarigar-frontend/.env.example
+
+# ======================
+# IDEs & Editors
+# ======================
+.idea/
+.project
+.classpath
+.c9/
+.settings/
+*.launch
+*.sublime-workspace
+
+# VS Code (keep shared configs)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ======================
+# Temp & Runtime
+# ======================
+.temp/
+.tmp/
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ======================
+# Node diagnostic reports
+# ======================
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
