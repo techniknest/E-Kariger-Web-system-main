@@ -1,0 +1,204 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- ENUMS ---
+enum UserRole {
+  ADMIN
+  VENDOR
+  CLIENT
+}
+
+enum BookingStatus {
+  CREATED
+  PENDING_APPROVAL
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
+enum VendorVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+
+}
+
+// --- MODELS ---
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  phone         String    @unique
+  password_hash String
+  role          UserRole
+  is_active     Boolean   @default(true)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  vendor_profile   VendorProfile?
+  client_bookings  Booking[]         @relation("ClientBookings")
+  reviews_written  Review[]
+  sent_messages    ChatMessage[]
+  admin_logs       AdminAuditLog[]
+  
+  @@map("users")
+}
+
+model VendorProfile {
+  id                 String    @id @default(uuid())
+  user_id            String    @unique
+  vendor_type        String    // "Individual", "Team", "Company"
+  description        String?
+  city               String
+  is_verified        Boolean   @default(false)
+  verification_badge Boolean   @default(false)
+  approval_status    VendorVerificationStatus @default(PENDING)
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  user                 User                 @relation(fields: [user_id], references: [id])
+  services             Service[]
+  vendor_bookings      Booking[]            @relation("VendorBookings")
+  verification_records VerificationRecord[]
+  reviews_received     Review[]
+
+  @@map("vendor_profiles")
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  is_active Boolean   @default(true)
+  services  Service[]
+
+  @@map("categories")
+}
+
+model Service {
+  id          String    @id @default(uuid())
+  vendor_id   String
+  category_id String
+  title       String
+  description String?
+  price       Decimal   @db.Decimal(10, 2)
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  vendor   VendorProfile @relation(fields: [vendor_id], references: [id])
+  category Category      @relation(fields: [category_id], references: [id])
+  bookings Booking[]
+
+  @@map("services")
+}
+
+model Booking {
+  id         String        @id @default(uuid())
+  client_id  String
+  vendor_id  String
+  service_id String
+  status     BookingStatus @default(CREATED)
+  location   String
+  expires_at DateTime?
+  created_at DateTime      @default(now())
+  updated_at DateTime      @updatedAt
+
+  client      User              @relation("ClientBookings", fields: [client_id], references: [id])
+  vendor      VendorProfile     @relation("VendorBookings", fields: [vendor_id], references: [id])
+  service     Service           @relation(fields: [service_id], references: [id])
+  status_logs BookingStatusLog[]
+  chat_room   ChatRoom?
+  review      Review?
+
+  @@map("bookings")
+}
+
+model BookingStatusLog {
+  id         String        @id @default(uuid())
+  booking_id String
+  old_status BookingStatus?
+  new_status BookingStatus
+  changed_by String
+  changed_at DateTime      @default(now())
+
+  booking    Booking       @relation(fields: [booking_id], references: [id])
+
+  @@map("booking_status_logs")
+}
+
+model ChatRoom {
+  id         String   @id @default(uuid())
+  booking_id String   @unique
+  created_at DateTime @default(now())
+
+  booking  Booking       @relation(fields: [booking_id], references: [id])
+  messages ChatMessage[]
+
+  @@map("chat_rooms")
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  room_id    String
+  sender_id  String
+  message    String
+  created_at DateTime @default(now())
+
+  room   ChatRoom @relation(fields: [room_id], references: [id])
+  sender User     @relation(fields: [sender_id], references: [id])
+
+  @@map("chat_messages")
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  booking_id String   @unique
+  client_id  String
+  vendor_id  String
+  rating     Int
+  comment    String?
+  created_at DateTime @default(now())
+
+  booking Booking       @relation(fields: [booking_id], references: [id])
+  client  User          @relation(fields: [client_id], references: [id])
+  vendor  VendorProfile @relation(fields: [vendor_id], references: [id])
+
+  @@map("reviews")
+}
+
+model VerificationRecord {
+  id           String    @id @default(uuid())
+  vendor_id    String
+  document_url String
+  status       String
+  reviewed_by  String?
+  reviewed_at  DateTime?
+
+  vendor VendorProfile @relation(fields: [vendor_id], references: [id])
+
+  @@map("verification_records")
+}
+
+model AdminAuditLog {
+  id          String   @id @default(uuid())
+  admin_id    String
+  action      String
+  target_type String
+  target_id   String
+  created_at  DateTime @default(now())
+
+  admin User @relation(fields: [admin_id], references: [id])
+
+  @@map("admin_audit_logs")
+}
