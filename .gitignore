@@ -8,34 +8,35 @@ coverage/
 logs/
 *.log
 .DS_Store
+.env
 
 # ======================
 # Backend (NestJS)
 # ======================
-ekarigar-backend/node_modules/
-ekarigar-backend/dist/
-ekarigar-backend/build/
-ekarigar-backend/coverage/
-ekarigar-backend/logs/
+# Matches your folder name: e-karigar-backend
+e-karigar-backend/node_modules/
+e-karigar-backend/dist/
+e-karigar-backend/build/
+e-karigar-backend/coverage/
+e-karigar-backend/logs/
 
-# Env files (backend)
-ekarigar-backend/.env
-ekarigar-backend/.env.*
-!ekarigar-backend/.env.example
-.env
+# Env files (backend) - CRITICAL SECURITY
+e-karigar-backend/.env
+e-karigar-backend/.env.*
+!e-karigar-backend/.env.example
+
+# Generated Prisma Client (if you output it to a custom path)
+e-karigar-backend/generated/prisma
 
 # ======================
-# Frontend (future - Next.js / React)
+# Frontend (Future)
 # ======================
-ekarigar-frontend/node_modules/
-ekarigar-frontend/.next/
-ekarigar-frontend/build/
-ekarigar-frontend/dist/
-
-# Env files (frontend)
-ekarigar-frontend/.env
-ekarigar-frontend/.env.*
-!ekarigar-frontend/.env.example
+e-karigar-frontend/node_modules/
+e-karigar-frontend/.next/
+e-karigar-frontend/build/
+e-karigar-frontend/dist/
+e-karigar-frontend/.env
+e-karigar-frontend/.env.*
 
 # ======================
 # IDEs & Editors
@@ -48,7 +49,7 @@ ekarigar-frontend/.env.*
 *.launch
 *.sublime-workspace
 
-# VS Code (keep shared configs)
+# VS Code (keep shared configs, ignore user settings)
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -69,3 +70,6 @@ pids/
 # Node diagnostic reports
 # ======================
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# YoYo AI version control directory
+.yoyo/
