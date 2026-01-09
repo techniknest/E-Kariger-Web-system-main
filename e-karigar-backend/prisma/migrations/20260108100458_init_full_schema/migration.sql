@@ -26,12 +26,12 @@ CREATE TABLE "users" (
 CREATE TABLE "vendor_profiles" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
-    "vendor_type" TEXT NOT NULL,
+    "vendor_type" TEXT NOT NULL DEFAULT 'INDIVIDUAL',
+    "approval_status" "VendorVerificationStatus" NOT NULL DEFAULT 'PENDING',
     "description" TEXT,
-    "city" TEXT NOT NULL,
+    "city" TEXT,
     "is_verified" BOOLEAN NOT NULL DEFAULT false,
     "verification_badge" BOOLEAN NOT NULL DEFAULT false,
-    "approval_status" "VendorVerificationStatus" NOT NULL DEFAULT 'PENDING',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
