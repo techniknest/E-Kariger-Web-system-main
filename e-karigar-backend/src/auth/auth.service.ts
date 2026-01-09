@@ -2,7 +2,7 @@ import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/co
 import { PrismaService } from '../prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { UserRole } from '@prisma/client';
+import { UserRole, VendorVerificationStatus } from '@prisma/client'; // Import Enum
 
 @Injectable()
 export class AuthService {
@@ -21,10 +21,10 @@ export class AuthService {
     const existingPhone = await this.prisma.user.findUnique({ where: { phone: data.phone } });
     if (existingPhone) throw new ConflictException('Phone number already in use');
 
-    // 2. Hash Password (bcrypt)
+    // 3. Hash Password
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    // 3. Create User in Transaction (Safely create Profile if Vendor)
+    // 4. Create User (Transaction)
     const result = await this.prisma.$transaction(async (prisma) => {
       const user = await prisma.user.create({
         data: {
@@ -36,13 +36,14 @@ export class AuthService {
         },
       });
 
-      // If User is a VENDOR, create their profile immediately
+      // SRS Req: Capture Vendor Details
       if (data.role === UserRole.VENDOR) {
         await prisma.vendorProfile.create({
           data: {
             user_id: user.id,
-            city: data.city || 'Lahore', // Default to Lahore per SRS single city scope
-            vendor_type: data.vendor_type || 'Individual',
+            city: data.city || 'Lahore', // SRS Scope: Single City 
+            vendor_type: data.vendor_type || 'INDIVIDUAL', // SRS Req: Ind/Team/Company 
+            approval_status: VendorVerificationStatus.PENDING, // Default status
           },
         });
       }
@@ -55,15 +56,29 @@ export class AuthService {
 
   // --- LOGIN ---
   async login(data: { email: string; password: string }) {
-    // 1. Find User
-    const user = await this.prisma.user.findUnique({ where: { email: data.email } });
+    // 1. Find User AND include Vendor Profile
+    const user = await this.prisma.user.findUnique({
+      where: { email: data.email },
+      include: { vendor_profile: true }, // Required to check approval status
+    });
+
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
     // 2. Check Password
     const isMatch = await bcrypt.compare(data.password, user.password_hash);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
-    // 3. Generate Token
+    // 3. SRS ENFORCEMENT: Block Unapproved Vendors 
+    if (user.role === UserRole.VENDOR) {
+      // If profile is missing OR status is not APPROVED, block them
+      if (!user.vendor_profile || user.vendor_profile.approval_status !== VendorVerificationStatus.APPROVED) {
+        throw new UnauthorizedException(
+          'Your account is pending Admin Approval. Please wait for verification.'
+        );
+      }
+    }
+
+    // 4. Generate Token
     const payload = { sub: user.id, email: user.email, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
@@ -71,6 +86,8 @@ export class AuthService {
         id: user.id,
         name: user.name,
         role: user.role,
+        // Send vendor type to frontend for UI adjustments
+        vendorType: user.vendor_profile?.vendor_type, 
       },
     };
   }
