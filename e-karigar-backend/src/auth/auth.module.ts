@@ -9,7 +9,7 @@ import { PassportModule } from '@nestjs/passport';
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'superSecretKey123', // In production, use .env
+      secret: process.env.JWT_SECRET , // In production, use .env
       signOptions: { expiresIn: '1d' }, // Token valid for 1 day
     }),
   ],

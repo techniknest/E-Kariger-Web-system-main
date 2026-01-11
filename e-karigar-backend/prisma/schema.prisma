@@ -30,42 +30,45 @@ enum VendorVerificationStatus {
   PENDING
   APPROVED
   REJECTED
-
 }
 
 // --- MODELS ---
 
 model User {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   name          String
-  email         String    @unique
-  phone         String    @unique
+  email         String   @unique
+  phone         String   @unique
   password_hash String
   role          UserRole
-  is_active     Boolean   @default(true)
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
 
-  vendor_profile   VendorProfile?
-  client_bookings  Booking[]         @relation("ClientBookings")
-  reviews_written  Review[]
-  sent_messages    ChatMessage[]
-  admin_logs       AdminAuditLog[]
-  
+  vendor_profile  VendorProfile?
+  client_bookings Booking[]       @relation("ClientBookings")
+  reviews_written Review[]
+  sent_messages   ChatMessage[]
+  admin_logs      AdminAuditLog[]
+
   @@map("users")
 }
 
 model VendorProfile {
-  id                 String    @id @default(uuid())
-  user_id            String    @unique
-  vendor_type        String    // "Individual", "Team", "Company"
+  id                 String                   @id @default(uuid())
+  user_id            String                   @unique
+  
+  // SRS Fields
+  vendor_type        String                   @default("INDIVIDUAL") // Individual, Team, Company
+  approval_status    VendorVerificationStatus @default(PENDING)      // Blocks login until APPROVED
+  
   description        String?
-  city               String
-  is_verified        Boolean   @default(false)
-  verification_badge Boolean   @default(false)
-  approval_status    VendorVerificationStatus @default(PENDING)
-  created_at         DateTime  @default(now())
-  updated_at         DateTime  @updatedAt
+  city               String?
+  is_verified        Boolean                  @default(false)
+  verification_badge Boolean                  @default(false)
+  
+  created_at         DateTime                 @default(now())
+  updated_at         DateTime                 @updatedAt
 
   user                 User                 @relation(fields: [user_id], references: [id])
   services             Service[]
@@ -86,15 +89,15 @@ model Category {
 }
 
 model Service {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid())
   vendor_id   String
   category_id String
   title       String
   description String?
-  price       Decimal   @db.Decimal(10, 2)
-  is_active   Boolean   @default(true)
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  price       Decimal  @db.Decimal(10, 2)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
   vendor   VendorProfile @relation(fields: [vendor_id], references: [id])
   category Category      @relation(fields: [category_id], references: [id])
@@ -125,14 +128,14 @@ model Booking {
 }
 
 model BookingStatusLog {
-  id         String        @id @default(uuid())
+  id         String         @id @default(uuid())
   booking_id String
   old_status BookingStatus?
   new_status BookingStatus
   changed_by String
-  changed_at DateTime      @default(now())
+  changed_at DateTime       @default(now())
 
-  booking    Booking       @relation(fields: [booking_id], references: [id])
+  booking Booking @relation(fields: [booking_id], references: [id])
 
   @@map("booking_status_logs")
 }
