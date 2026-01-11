@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import AdminDashboard from "../components/AdminDashboard";
+import VendorDashboard from "../components/VendorDashboard";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -41,21 +42,24 @@ const DashboardPage = () => {
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-        {/* Conditional Rendering based on Role */}
+        
+        {/* --- ADMIN VIEW --- */}
         {user.role === "ADMIN" && <AdminDashboard />}
         
-        {user.role === "VENDOR" && (
-          <div className="p-8 bg-white rounded-lg shadow text-center">
-            <h2 className="text-2xl font-bold text-gray-800">Vendor Dashboard</h2>
-            <p className="mt-2 text-gray-600">Manage your services and bookings here.</p>
-            {/* We will build this in Phase 5 */}
-          </div>
-        )}
+        {/* --- VENDOR VIEW (Updated) --- */}
+        {user.role === "VENDOR" && <VendorDashboard />}
 
+        {/* --- CLIENT VIEW --- */}
         {user.role === "CLIENT" && (
           <div className="p-8 bg-white rounded-lg shadow text-center">
             <h2 className="text-2xl font-bold text-gray-800">Client Dashboard</h2>
             <p className="mt-2 text-gray-600">Find services and manage your bookings here.</p>
+            <button 
+              onClick={() => navigate("/")}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Browse Services
+            </button>
           </div>
         )}
       </main>

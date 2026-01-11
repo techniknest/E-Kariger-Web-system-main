@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Hammer, Loader2 } from "lucide-react";
-import api from "../services/api"; // Ensure this path matches your folder structure
-import { useNavigate } from "react-router-dom"; // Add this
+import api from "../services/api"; 
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate(); // Add this line
-  // 1. Add Loading and Error States
+  const navigate = useNavigate();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   
@@ -15,27 +15,26 @@ const LoginPage = () => {
     password: "",
   });
 
-  // 2. The Real Login Logic
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(""); // Clear previous errors
+    setError(""); 
 
-   try {
-  const response = await api.post('/auth/login', formData);
+    try {
+      const response = await api.post('/auth/login', formData);
 
-  console.log("Login Success:", response.data);
+      console.log("Login Success:", response.data);
 
-  // 1. Save Token and User Info to LocalStorage
-  localStorage.setItem("token", response.data.access_token);
-  localStorage.setItem("user", JSON.stringify(response.data.user));
+      // 1. Save Token and User Info to LocalStorage
+      // CRITICAL: The key "token" here must match what api.ts looks for
+      localStorage.setItem("token", response.data.access_token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
 
-  // 2. Redirect to Dashboard
-  navigate("/dashboard");
+      // 2. Redirect to Dashboard
+      navigate("/dashboard");
       
     } catch (err: any) {
       console.error("Login Failed:", err);
-      // specific error message from backend or fallback
       const message = err.response?.data?.message || "Login failed. Please check your connection.";
       setError(message);
     } finally {
@@ -59,7 +58,7 @@ const LoginPage = () => {
           </p>
         </div>
 
-        {/* 3. Error Alert Box */}
+        {/* Error Alert Box */}
         {error && (
           <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200 flex items-center">
              <span>{error}</span>
@@ -126,26 +125,6 @@ const LoginPage = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Remember me
-              </label>
-            </div>
-            <div className="text-sm">
-              <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-                Forgot password?
-              </a>
-            </div>
-          </div>
-
-          {/* 4. Updated Submit Button with Loading State */}
           <button
             type="submit"
             disabled={isLoading}
