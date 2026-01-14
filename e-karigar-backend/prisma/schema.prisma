@@ -38,7 +38,7 @@ model User {
   id            String   @id @default(uuid())
   name          String
   email         String   @unique
-  phone         String   @unique
+  phone         String?  @unique  // Optional for minimal-friction registration
   password_hash String
   role          UserRole
   is_active     Boolean  @default(true)
@@ -66,6 +66,11 @@ model VendorProfile {
   city               String?
   is_verified        Boolean                  @default(false)
   verification_badge Boolean                  @default(false)
+  
+  // New fields for Become a Seller application
+  cnic               String?                  @unique  // National ID (CNIC) for verification
+  business_phone     String?                           // Business contact number  
+  experience_years   Int?                              // Years of experience
   
   created_at         DateTime                 @default(now())
   updated_at         DateTime                 @updatedAt

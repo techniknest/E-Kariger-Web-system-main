@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Hammer, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Hammer, Loader2, User } from "lucide-react";
 import api from "../services/api";
 
-const LoginPage = () => {
+const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
   });
@@ -22,24 +22,19 @@ const LoginPage = () => {
     setError("");
 
     try {
-      const response = await api.post("/auth/login", formData);
+      const response = await api.post("/auth/register", formData);
 
-      console.log("Login Success:", response.data);
+      console.log("Registration Success:", response.data);
 
-      // Save Token and User Info to LocalStorage
+      // Auto-login: Save Token and User Info
       localStorage.setItem("token", response.data.access_token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
-      // Check for redirect parameter
-      const redirect = searchParams.get("redirect");
-      if (redirect) {
-        navigate(redirect);
-      } else {
-        navigate("/dashboard");
-      }
+      // Redirect to Dashboard
+      navigate("/dashboard");
     } catch (err: any) {
-      console.error("Login Failed:", err);
-      const message = err.response?.data?.message || "Login failed. Please check your credentials.";
+      console.error("Registration Failed:", err);
+      const message = err.response?.data?.message || "Registration failed. Please try again.";
       setError(message);
     } finally {
       setIsLoading(false);
@@ -57,10 +52,10 @@ const LoginPage = () => {
             </div>
           </Link>
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Welcome Back
+            Join E-Karigar
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Sign in to manage your E-Karigar account
+            Create your account and start exploring services
           </p>
         </div>
 
@@ -72,9 +67,31 @@ const LoginPage = () => {
           </div>
         )}
 
-        {/* Login Form */}
+        {/* Registration Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
+            {/* Name Field */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Full Name
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all"
+                  placeholder="Muhammad Ali"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+            </div>
+
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -111,6 +128,7 @@ const LoginPage = () => {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
+                  minLength={6}
                   className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all"
                   placeholder="••••••••"
                   value={formData.password}
@@ -128,6 +146,7 @@ const LoginPage = () => {
                   )}
                 </button>
               </div>
+              <p className="mt-1 text-xs text-gray-500">Must be at least 6 characters</p>
             </div>
           </div>
 
@@ -143,15 +162,15 @@ const LoginPage = () => {
                 <ArrowRight className="h-5 w-5 text-blue-300 group-hover:text-blue-200 transition-colors" />
               )}
             </span>
-            {isLoading ? "Signing in..." : "Sign in"}
+            {isLoading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-600">
-          Don't have an account?{" "}
-          <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-500">
-            Join Now
+          Already have an account?{" "}
+          <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-500">
+            Sign in
           </Link>
         </div>
       </div>
@@ -159,4 +178,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
