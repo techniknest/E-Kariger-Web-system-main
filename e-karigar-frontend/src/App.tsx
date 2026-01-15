@@ -6,7 +6,7 @@ import DashboardPage from "./pages/DashboardPage";
 import BecomeVendorPage from "./pages/BecomeVendorPage";
 
 // Security Wrapper: Checks if token exists before showing protected pages
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
   const token = localStorage.getItem("token");
   if (!token) {
     return <Navigate to="/login" replace />;
@@ -15,7 +15,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 };
 
 // Redirect logged-in users away from auth pages
-const PublicOnlyRoute = ({ children }: { children: JSX.Element }) => {
+const PublicOnlyRoute = ({ children }: { children: React.ReactElement }) => {
   const token = localStorage.getItem("token");
   if (token) {
     return <Navigate to="/dashboard" replace />;

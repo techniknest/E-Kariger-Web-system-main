@@ -2,11 +2,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Hammer, LogOut, LayoutDashboard, Home, Briefcase, Menu, X } from "lucide-react";
 import { useState } from "react";
 
-interface NavbarProps {
-  variant?: "default" | "dashboard";
-}
 
-const Navbar = ({ variant = "default" }: NavbarProps) => {
+const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -54,11 +51,10 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
           {/* Home Link - Always visible */}
           <Link
             to="/"
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${
-              location.pathname === "/"
-                ? "text-blue-600 bg-blue-50"
-                : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${location.pathname === "/"
+              ? "text-blue-600 bg-blue-50"
+              : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+              }`}
           >
             <Home className="h-4 w-4" />
             Home
@@ -240,7 +236,7 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
               <div className="px-4 py-2 text-sm text-gray-500">
                 Signed in as <span className="font-medium text-gray-800">{user?.name}</span>
               </div>
-              
+
               {isClient && !isPendingVendor && !isVendor && (
                 <button
                   onClick={() => {
@@ -268,7 +264,7 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
                 <LayoutDashboard className="h-5 w-5" />
                 {isVendor ? "Vendor Dashboard" : isAdmin ? "Admin Panel" : "My Dashboard"}
               </Link>
-              
+
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
