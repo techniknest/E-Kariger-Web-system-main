@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Search, Star, MapPin, ArrowRight } from "lucide-react";
 import api from "../services/api";
 import Navbar from "../components/Navbar";
@@ -18,7 +17,6 @@ interface Service {
 }
 
 const HomePage = () => {
-  const navigate = useNavigate();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -136,7 +134,7 @@ const HomePage = () => {
               <div
                 key={service.id}
                 className="bg-white rounded-2xl border border-gray-200 hover:shadow-xl hover:border-blue-200 transition-all duration-300 overflow-hidden group flex flex-col h-full cursor-pointer"
-                onClick={() => {/* TODO: Navigate to service detail */}}
+                onClick={() => {/* TODO: Navigate to service detail */ }}
               >
                 {/* Image Placeholder */}
                 <div className="h-48 bg-gradient-to-br from-gray-200 to-gray-300 relative overflow-hidden">
