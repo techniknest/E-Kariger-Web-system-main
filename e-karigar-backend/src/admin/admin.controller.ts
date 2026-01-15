@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Delete, Param, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AuthGuard } from '../auth/auth.guard';
 
@@ -6,7 +6,7 @@ import { AuthGuard } from '../auth/auth.guard';
 @Controller('admin')
 @UseGuards(AuthGuard)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(private readonly adminService: AdminService) { }
 
   @Get('vendors/pending')
   async getPendingVendors() {
@@ -31,5 +31,15 @@ export class AdminController {
   @Get('stats')
   async getDashboardStats() {
     return this.adminService.getDashboardStats();
+  }
+
+  @Delete('vendors/:id')
+  async deleteVendor(@Param('id') id: string) {
+    return this.adminService.deleteVendor(id);
+  }
+
+  @Delete('services/:id')
+  async deleteService(@Param('id') id: string) {
+    return this.adminService.deleteService(id);
   }
 }

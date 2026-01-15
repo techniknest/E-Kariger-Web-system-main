@@ -4,7 +4,7 @@ import { VendorVerificationStatus } from '@prisma/client';
 
 @Injectable()
 export class AdminService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // 1. Get All Pending Vendors (with full details)
   async getPendingVendors() {
@@ -81,5 +81,35 @@ export class AdminService {
       totalUsers,
       totalServices,
     };
+  }
+
+  // 6. Delete a Vendor
+  async deleteVendor(vendorId: string) {
+    const vendor = await this.prisma.vendorProfile.findUnique({
+      where: { id: vendorId },
+    });
+
+    if (!vendor) throw new NotFoundException('Vendor not found');
+
+    await this.prisma.service.deleteMany({
+      where: { vendor_id: vendorId },
+    });
+
+    return this.prisma.vendorProfile.delete({
+      where: { id: vendorId },
+    });
+  }
+
+  // 7. Delete any Service (Admin)
+  async deleteService(serviceId: string) {
+    const service = await this.prisma.service.findUnique({
+      where: { id: serviceId },
+    });
+
+    if (!service) throw new NotFoundException('Service not found');
+
+    return this.prisma.service.delete({
+      where: { id: serviceId },
+    });
   }
 }
