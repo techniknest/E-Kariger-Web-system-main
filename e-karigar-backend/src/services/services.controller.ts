@@ -1,10 +1,10 @@
-import { Controller, Post, Get, Body, Request, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Body, Param, Request, UseGuards } from '@nestjs/common';
 import { ServicesService } from './services.service';
 import { AuthGuard } from '../auth/auth.guard'; // Import the guard we just created
 
 @Controller('services')
 export class ServicesController {
-  constructor(private readonly servicesService: ServicesService) {}
+  constructor(private readonly servicesService: ServicesService) { }
 
   // --- PUBLIC: Homepage ---
   @Get('public')
@@ -24,5 +24,17 @@ export class ServicesController {
   @Get('my')
   async getMyServices(@Request() req) {
     return this.servicesService.getMyServices(req.user.sub);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch(':id')
+  async update(@Request() req, @Param('id') id: string, @Body() body: any) {
+    return this.servicesService.updateService(req.user.sub, id, body);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  async delete(@Request() req, @Param('id') id: string) {
+    return this.servicesService.deleteService(req.user.sub, id);
   }
 }

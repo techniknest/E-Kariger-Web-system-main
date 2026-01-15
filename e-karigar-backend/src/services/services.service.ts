@@ -3,9 +3,9 @@ import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class ServicesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
- async findAll() {
+  async findAll() {
     return this.prisma.service.findMany({
       where: { is_active: true },
       include: {
@@ -13,14 +13,14 @@ export class ServicesService {
           include: {
             // "city" is already inside 'vendor', so we don't need to ask for it here.
             // We only need to ask for the name from the 'user' relation.
-            user: { select: { name: true } } 
+            user: { select: { name: true } }
           }
         },
         category: true,
       },
     });
   } // 1. Public: Get All Services (For Homepage)
- 
+
 
   // 2. Protected: Create Service
   async createService(userId: string, data: any) {
@@ -50,14 +50,54 @@ export class ServicesService {
       },
     });
   }
-  
+
   // 3. Protected: Get Vendor's Own Services
   async getMyServices(userId: string) {
     const vendor = await this.prisma.vendorProfile.findUnique({ where: { user_id: userId } });
     if (!vendor) return [];
-    
+
     return this.prisma.service.findMany({
       where: { vendor_id: vendor.id }
+    });
+  }
+
+  // 4. Update Service (Owner only)
+  async updateService(userId: string, serviceId: string, data: any) {
+    const vendor = await this.prisma.vendorProfile.findUnique({ where: { user_id: userId } });
+    if (!vendor) throw new NotFoundException("Vendor profile not found");
+
+    const service = await this.prisma.service.findUnique({
+      where: { id: serviceId }
+    });
+
+    if (!service) throw new NotFoundException("Service not found");
+    if (service.vendor_id !== vendor.id) throw new NotFoundException("You do not own this service");
+
+    return this.prisma.service.update({
+      where: { id: serviceId },
+      data: {
+        title: data.title ?? service.title,
+        description: data.description ?? service.description,
+        price: data.price ?? service.price,
+        is_active: data.is_active ?? service.is_active,
+      }
+    });
+  }
+
+  // 5. Delete Service (Owner only)
+  async deleteService(userId: string, serviceId: string) {
+    const vendor = await this.prisma.vendorProfile.findUnique({ where: { user_id: userId } });
+    if (!vendor) throw new NotFoundException("Vendor profile not found");
+
+    const service = await this.prisma.service.findUnique({
+      where: { id: serviceId }
+    });
+
+    if (!service) throw new NotFoundException("Service not found");
+    if (service.vendor_id !== vendor.id) throw new NotFoundException("You do not own this service");
+
+    return this.prisma.service.delete({
+      where: { id: serviceId }
     });
   }
 }
