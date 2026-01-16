@@ -1,103 +1,140 @@
 # 🛠️ E-Karigar Web System
 
-A professional, full-stack service marketplace platform designed for reliability and scalability. **E-Karigar** connects skilled workers (karigars) with clients, providing a seamless booking and management experience.
+![Status](https://img.shields.io/badge/Status-Active_Development-brightgreen?style=flat-square)
+![Stack](https://img.shields.io/badge/Stack-MERN_%2B_NestJS-blue?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-gray?style=flat-square)
+
+A professional, full-stack service marketplace platform designed to connect skilled workers (**Karigars**) with clients. E-Karigar provides a seamless, secure, and modern experience for finding and booking local experts for plumbing, electrical work, carpentry, and more.
+
+---
+
+## 🌟 Key Features
+
+### 👤 For Clients
+- **Find Experts**: Search and filter skilled professionals by service type (Plumber, Electrician, etc.).
+- **Verified Vendors**: View profiles with verified badges, descriptions, and service listings.
+- **Easy Booking**: Seamlessly book services (coming soon).
+- **Secure Auth**: JWT-based secure login and registration.
+
+### 🛠️ For Vendors (Karigars)
+- **Vendor Dashboard**: Dedicated dashboard to manage services, view earnings, and track orders.
+- **Service Management**: Create, edit, and delete service listings with pricing and descriptions.
+- **Application Flow**: "Become a Seller" application process with Admin approval.
+- **Stats**: Real-time overview of active services and profile status.
+
+### 🛡️ For Admins
+- **Admin Panel**: Comprehensive oversight of the platform.
+- **Vendor Verification**: Review, approve, or reject vendor applications ensuring quality control.
+- **User Management**: View and manage all users and vendors.
+- **Platform Stats**: Track total users, vendors, and services.
 
 ---
 
 ## 🚀 Technical Stack
 
-### **Backend (NestJS)**
-- **Framework**: [NestJS v11](https://nestjs.com/) (Node.js) - Progressive, scalable, and modular architecture.
-- **ORM**: [Prisma v6.1.0](https://www.prisma.io/) - Next-generation Node.js and TypeScript ORM.
-- **Database**: [PostgreSQL](https://www.postgresql.org/) - Powerful, open-source object-relational database.
-- **Auth**: JWT (JSON Web Tokens) with Passport strategy.
-- **Validation**: Custom uniqueness checks for emails and phone numbers.
+### **Backend**
+| Tech | Description |
+| :--- | :--- |
+| **NestJS** | Progressive Node.js framework for scalable server-side apps. |
+| **Prisma ORM** | Type-safe database access for PostgreSQL. |
+| **PostgreSQL** | Robust relational database system. |
+| **JWT** | Secure authentication and session management. |
 
-### **Frontend (React)**
-- **Framework**: [React 19](https://react.dev/) with **TypeScript** for type safety.
-- **Build Tool**: [Vite](https://vitejs.dev/) - Lightning-fast frontend tooling.
-- **State Management**: [TanStack React Query v5](https://tanstack.com/query/latest) for powerful server-state handling.
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) - Modern utility-first CSS framework (Zero-config setup).
-- **Icons**: Lucide React.
+### **Frontend**
+| Tech | Description |
+| :--- | :--- |
+| **React 19** | Modern UI library with TypeScript. |
+| **Vite** | Lightning-fast build tool and dev server. |
+| **Tailwind CSS** | Utility-first framework for custom, responsive design. |
+| **Lucide React** | Beautiful, consistent icon set. |
+| **Axios** | Promise-based HTTP client for API integration. |
 
 ---
 
-## 📂 Project Structure
+## 📸 Screenshots
 
-The project is organized into two primary independent modules:
+*(Screenshots of the Landing Page, Dashboard, and Admin Panel will be added here)*
 
-```text
-E-Kariger-Web-system-main/
-├── e-karigar-backend/      # NestJS Application
-│   ├── prisma/             # Database schema and migrations
-│   └── src/                # Backend source code (Auth, Modules, Services)
-├── e-karigar-frontend/     # React + Vite Application
-│   ├── src/                # Frontend source code (Pages, Components, API)
-│   └── public/             # Static assets
-└── README.md               # Root documentation (this file)
+---
+
+## ⚙️ Installation & Setup
+
+### Prerequisites
+- Node.js (v18+)
+- PostgreSQL (Local or Cloud)
+- npm or yarn
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/E-Kariger-Web-system.git
+cd E-Kariger-Web-system-main
 ```
 
----
-
-## ⚙️ Setup & Installation
-
-### **Prerequisites**
-- **Node.js**: v18.x or higher
-- **PostgreSQL**: Local instance running
-- **npm**: v10.x or higher
-
-### **1. Backend Setup**
-Navigate to the backend directory and install dependencies:
+### 2. Backend Setup
 ```bash
 cd e-karigar-backend
+
+# Install dependencies
 npm install
-```
 
-Config your `.env` file (create it if missing):
-```env
-DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/ekarigar_db?schema=public"
-JWT_SECRET="your_secret_key"
-```
+# Configure Environment Variables
+# Create a .env file and add:
+# DATABASE_URL="postgresql://user:password@localhost:5432/ekarigar_db?schema=public"
+# JWT_SECRET="your_secret_key"
 
-Generate Prisma Client and Start:
-```bash
-npx prisma generate
+# Run Migrations
+npx prisma migrate dev
+
+# Start Server
 npm run start:dev
 ```
 
-### **2. Frontend Setup**
-Navigate to the frontend directory and install dependencies:
+### 3. Frontend Setup
 ```bash
 cd e-karigar-frontend
-npm install
-```
 
-Start the Development Server:
-```bash
+# Install dependencies
+npm install
+
+# Start Dev Server
 npm run dev
 ```
+Visit `http://localhost:5173` to view the app.
 
 ---
 
-## 🛠️ Recent Improvements & Stability
-- **Windows Compatibility**: Downgraded to Prisma v6.1.0 to resolve the `PrismaClientConstructorValidationError` common in newer v7 releases on Windows systems.
-- **Data Integrity**: Implemented proactive phone number uniqueness checks in the `AuthService` to prevent unhandled database exceptions during user registration.
-- **Modern Styling**: Fully integrated **Tailwind CSS v4** using the modern Vite plugin architecture, eliminating legacy configuration files.
-- **CORS Configuration**: Backend is pre-configured to allow requests from the standard Vite development port (`http://localhost:5173`).
+## 🗺️ Roadmap & Progress
+
+- [x] **Core System**
+    - [x] Backend Setup (NestJS + Prisma)
+    - [x] Database Schema Design
+    - [x] Authentication (Login/Register/JWT)
+
+- [x] **Frontend Foundation**
+    - [x] React + Vite Setup
+    - [x] Modern UI Design System (Glassmorphism, Tailwind)
+    - [x] Navbar & Layouts
+
+- [x] **Vendor Features**
+    - [x] Vendor Application Flow
+    - [x] Vendor Dashboard
+    - [x] Service Management (CRUD)
+
+- [x] **Admin Features**
+    - [x] Admin Dashboard
+    - [x] Vendor Verification (Approve/Reject)
+    - [x] Platform Statistics
+
+- [ ] **Future Updates**
+    - [ ] Service Booking & Scheduling
+    - [ ] Reviews & Ratings System
+    - [ ] Chat System
+    - [ ] Payment Integration
 
 ---
 
-## 📝 Roadmap
-- [x] Backend Core & Database Schema
-- [x] User Authentication (JWT)
-- [x] Frontend Initialization
-- [x] Tailwind CSS v4 Integration
-- [/] Login & Registration Pages
-- [ ] Vendor Dashboard & Profile Management
-- [ ] Service Booking System
-- [ ] Real-time Chat (WebSockets)
-
----
+## 🤝 Contributing
+Contributions are welcome! Please fork the repository and submit a pull request.
 
 ## 📄 License
-This project is [UNLICENSED](LICENSE).
+This project is licensed under the MIT License.

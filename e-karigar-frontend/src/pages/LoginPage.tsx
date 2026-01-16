@@ -23,22 +23,12 @@ const LoginPage = () => {
 
     try {
       const response = await api.post("/auth/login", formData);
-
-      console.log("Login Success:", response.data);
-
-      // Save Token and User Info to LocalStorage
       localStorage.setItem("token", response.data.access_token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
-      // Check for redirect parameter
       const redirect = searchParams.get("redirect");
-      if (redirect) {
-        navigate(redirect);
-      } else {
-        navigate("/dashboard");
-      }
+      navigate(redirect || "/dashboard");
     } catch (err: any) {
-      console.error("Login Failed:", err);
       const message = err.response?.data?.message || "Login failed. Please check your credentials.";
       setError(message);
     } finally {
@@ -47,112 +37,80 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-        {/* Header Section */}
-        <div className="text-center">
-          <Link to="/" className="inline-flex items-center justify-center">
-            <div className="mx-auto h-14 w-14 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Hammer className="h-7 w-7 text-white" />
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-indigo-50 to-transparent z-0"></div>
+      <div className="absolute top-20 right-20 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+      <div className="absolute top-40 left-20 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+
+      <div className="w-full max-w-md relative z-10 p-6">
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex p-3 bg-white rounded-2xl shadow-lg shadow-indigo-100 mb-6">
+            <Hammer className="h-8 w-8 text-indigo-600" />
           </Link>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Welcome Back
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign in to manage your E-Karigar account
-          </p>
+          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Welcome back</h2>
+          <p className="text-slate-500 mt-2">Enter your details to access your account</p>
         </div>
 
-        {/* Error Alert Box */}
-        {error && (
-          <div className="p-4 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200 flex items-center gap-2">
-            <span className="font-medium">⚠️</span>
-            <span>{error}</span>
-          </div>
-        )}
+        <div className="glass rounded-2xl p-8">
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 text-red-600 text-sm rounded-xl flex items-center gap-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
+              {error}
+            </div>
+          )}
 
-        {/* Login Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            {/* Email Field */}
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5 ml-1">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
                 <input
-                  id="email"
-                  name="email"
                   type="email"
                   required
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all"
-                  placeholder="you@example.com"
+                  className="input-field pl-11"
+                  placeholder="you@company.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </div>
             </div>
 
-            {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5 ml-1">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
                 <input
-                  id="password"
-                  name="password"
                   type={showPassword ? "text" : "password"}
                   required
-                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all"
+                  className="input-field pl-11 pr-11"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600 transition"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg"
-          >
-            <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 text-blue-300 animate-spin" />
-              ) : (
-                <ArrowRight className="h-5 w-5 text-blue-300 group-hover:text-blue-200 transition-colors" />
-              )}
-            </span>
-            {isLoading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
+            <button type="submit" disabled={isLoading} className="btn-primary w-full flex justify-center items-center gap-2 mt-4">
+              {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <>Sign In <ArrowRight className="h-4 w-4" /></>}
+            </button>
+          </form>
+        </div>
 
-        {/* Footer */}
-        <div className="text-center text-sm text-gray-600">
-          Don't have an account?{" "}
-          <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-500">
-            Join Now
-          </Link>
+        <div className="text-center mt-6">
+          <p className="text-slate-500 text-sm">
+            Don't have an account?{" "}
+            <Link to="/register" className="font-semibold text-indigo-600 hover:text-indigo-700 transition">
+              Sign up now
+            </Link>
+          </p>
         </div>
       </div>
     </div>
