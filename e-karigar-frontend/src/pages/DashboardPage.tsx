@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  
+
   // Get user from local storage
   const userString = localStorage.getItem("user");
   const user = userString ? JSON.parse(userString) : null;
@@ -27,8 +27,8 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      {/* Main Content Area - Added mt-20 to fix overlap */}
+      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 mt-20">
         {/* Dashboard Header */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -40,7 +40,7 @@ const DashboardPage = () => {
                 Welcome back, <span className="font-semibold">{user.name}</span>
               </p>
             </div>
-            
+
             {/* Quick action for clients */}
             {(isClient || isPendingVendor) && (
               <button
@@ -55,7 +55,7 @@ const DashboardPage = () => {
         </div>
 
         {/* --- STATUS BANNERS --- */}
-        
+
         {/* Pending Vendor Banner */}
         {isPendingVendor && (
           <div className="mb-6 bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 rounded-xl p-6 shadow-sm">
@@ -68,7 +68,7 @@ const DashboardPage = () => {
                   Your Seller Application is Under Review
                 </h3>
                 <p className="text-yellow-700">
-                  Our team is reviewing your application. This usually takes 24-48 hours. 
+                  Our team is reviewing your application. This usually takes 24-48 hours.
                   You'll be notified once approved, and then you can start adding services.
                 </p>
               </div>
@@ -88,7 +88,7 @@ const DashboardPage = () => {
                   Application Not Approved
                 </h3>
                 <p className="text-red-700">
-                  Unfortunately, your seller application was not approved. 
+                  Unfortunately, your seller application was not approved.
                   Please contact our support team for more information.
                 </p>
               </div>
@@ -113,7 +113,7 @@ const DashboardPage = () => {
                   <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-white"></div>
                   <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full bg-white"></div>
                 </div>
-                
+
                 <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
                   <div className="flex items-start gap-4">
                     <div className="bg-white/20 p-4 rounded-xl backdrop-blur-sm hidden sm:block">
@@ -122,7 +122,7 @@ const DashboardPage = () => {
                     <div>
                       <h3 className="text-2xl font-bold mb-2">Are you a Skilled Professional?</h3>
                       <p className="text-blue-100 max-w-lg">
-                        Join E-Karigar as a vendor to list your services, find local clients, 
+                        Join E-Karigar as a vendor to list your services, find local clients,
                         and grow your income. It takes just 2 minutes to apply.
                       </p>
                     </div>
