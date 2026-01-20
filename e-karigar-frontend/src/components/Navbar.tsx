@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Hammer, LogOut, LayoutDashboard, Home, Briefcase, Menu, X } from "lucide-react";
+import { Hammer, LogOut, LayoutDashboard, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const Navbar = () => {
@@ -23,7 +23,6 @@ const Navbar = () => {
   const isClient = user?.role === "CLIENT";
   const isVendor = user?.role === "VENDOR" || user?.vendorStatus === "APPROVED";
   const isPendingVendor = user?.vendorStatus === "PENDING";
-  const isAdmin = user?.role === "ADMIN";
 
   const isHome = location.pathname === "/";
   // Text color logic: White if on Home AND not scrolled. Dark otherwise.

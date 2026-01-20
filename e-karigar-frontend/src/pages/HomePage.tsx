@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, Star, MapPin, ArrowRight, Loader2 } from "lucide-react";
+import { Search, MapPin, ArrowRight, Loader2 } from "lucide-react";
 import api from "../services/api";
 import Navbar from "../components/Navbar";
 
@@ -147,7 +147,7 @@ const HomePage = () => {
                     <MapPin className="h-3 w-3 text-indigo-500" />
                     {service.vendor.city || "Lahore"}
                   </div>
-                </div>
+                </div >
 
                 <div className="p-6 flex flex-col flex-grow">
                   <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-1">
@@ -174,14 +174,14 @@ const HomePage = () => {
                     </button>
                   </div>
                 </div>
-              </div>
+              </div >
             ))}
-          </div>
+          </div >
         )}
-      </div>
+      </div >
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-12 px-6">
+      < footer className="bg-slate-900 text-slate-400 py-12 px-6" >
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
             <p className="text-white font-bold text-xl mb-1">E-Karigar</p>
@@ -191,8 +191,8 @@ const HomePage = () => {
             © 2026 E-Karigar Inc. All rights reserved.
           </div>
         </div>
-      </footer>
-    </div>
+      </footer >
+    </div >
   );
 };
 
