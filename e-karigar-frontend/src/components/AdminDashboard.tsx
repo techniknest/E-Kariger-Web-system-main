@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, X, Shield, Users, Loader2, Briefcase, BarChart3, Phone, CreditCard, Clock, Trash2, Package, Search } from "lucide-react";
+import { Check, Shield, Users, Loader2, Briefcase, BarChart3, Phone, CreditCard, Trash2, Package, Search } from "lucide-react";
 import api from "../services/api";
 
 interface Service {
