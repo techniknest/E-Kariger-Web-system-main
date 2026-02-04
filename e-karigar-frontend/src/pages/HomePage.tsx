@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Search, MapPin, ArrowRight, Loader2 } from "lucide-react";
 import api from "../services/api";
 import Navbar from "../components/Navbar";
@@ -132,8 +133,9 @@ const HomePage = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filteredServices.map((service) => (
-              <div
+              <Link
                 key={service.id}
+                to={`/services/${service.id}`}
                 className="bg-white rounded-2xl border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer overflow-hidden flex flex-col h-full"
               >
                 {/* Image Placeholder */}
@@ -174,7 +176,7 @@ const HomePage = () => {
                     </button>
                   </div>
                 </div>
-              </div >
+              </Link >
             ))}
           </div >
         )}

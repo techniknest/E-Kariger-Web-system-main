@@ -21,6 +21,22 @@ export class ServicesService {
     });
   } // 1. Public: Get All Services (For Homepage)
 
+  async findOne(id: string) {
+    const service = await this.prisma.service.findUnique({
+      where: { id },
+      include: {
+        vendor: {
+          include: {
+            user: { select: { name: true, email: true } }
+          }
+        },
+        category: true,
+      },
+    });
+    if (!service) throw new NotFoundException('Service not found');
+    return service;
+  }
+
 
   // 2. Protected: Create Service
   async createService(userId: string, data: any) {

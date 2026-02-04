@@ -5,10 +5,11 @@ import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { ServicesModule } from './services/services.module';
 import { VendorsModule } from './vendors/vendors.module';
+import { BookingsModule } from './bookings/bookings.module';
 
 @Module({
-  imports: [AuthModule, AdminModule, ServicesModule, VendorsModule],
+  imports: [AuthModule, AdminModule, ServicesModule, VendorsModule, BookingsModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

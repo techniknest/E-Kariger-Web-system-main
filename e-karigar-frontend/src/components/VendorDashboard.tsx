@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, DollarSign, Trash2, Package, TrendingUp, Users, Home, Loader2, Edit2, Archive, Clock } from "lucide-react";
-import api from "../services/api";
+import { Plus, DollarSign, Trash2, Package, TrendingUp, Users, Home, Loader2, Edit2, Archive, Clock, Calendar, Check, X, CheckCircle } from "lucide-react";
+import api, { bookingsApi } from "../services/api";
 
 interface Service {
   id: string;
@@ -14,8 +14,14 @@ interface Service {
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'services' | 'bookings'>('services');
+  
   const [services, setServices] = useState<Service[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
+  
   const [loading, setLoading] = useState(true);
+  const [loadingBookings, setLoadingBookings] = useState(false);
+  
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -24,21 +30,35 @@ const VendorDashboard = () => {
 
   const [formData, setFormData] = useState({ title: "", description: "", price: "" });
 
-  // Fetch My Services
-  const fetchServices = async () => {
+  // Fetch Data
+  const fetchData = async () => {
     try {
-      const res = await api.get("/services/my");
-      setServices(res.data);
+      const [servicesRes, bookingsRes] = await Promise.all([
+        api.get("/services/my"),
+        bookingsApi.getVendorBookings()
+      ]);
+      setServices(servicesRes.data);
+      setBookings(bookingsRes);
     } catch (err) {
-      console.error("Failed to load services");
+      console.error("Failed to load dashboard data");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchServices();
+    fetchData();
   }, []);
+
+  const handleStatusUpdate = async (id: string, status: string) => {
+      try {
+          await bookingsApi.updateStatus(id, status);
+          // Refresh bookings locally
+          setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
+      } catch (error) {
+          alert("Failed to update status");
+      }
+  };
 
   // Handle Create or Update Service
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,7 +82,7 @@ const VendorDashboard = () => {
       setShowForm(false);
       setEditingServiceId(null);
       setFormData({ title: "", description: "", price: "" });
-      fetchServices();
+      fetchData(); // Refresh all data
     } catch (err) {
       alert(editingServiceId ? "Failed to update service" : "Failed to create service");
     } finally {
@@ -102,9 +122,11 @@ const VendorDashboard = () => {
   }
 
   // Calculate stats
-  // For demo purposes, we're mocking earnings/orders until backend supports it
-  const totalEarnings = services.length * 1500;
-  const totalOrders = services.length * 5;
+  // For demo purposes, we're mocking earnings until backend supports it
+  const totalEarnings = bookings
+    .filter(b => b.status === 'COMPLETED')
+    .reduce((sum, b) => sum + Number(b.total_price), 0);
+  const totalOrders = bookings.length;
 
   if (loading) {
     return (
@@ -133,7 +155,7 @@ const VendorDashboard = () => {
         {[
           { label: "Active Services", value: services.length, icon: Package, color: "text-blue-600", bg: "bg-blue-100" },
           { label: "Total Earnings", value: `Rs. ${totalEarnings}`, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-100" },
-          { label: "Completed Orders", value: totalOrders, icon: Users, color: "text-purple-600", bg: "bg-purple-100" },
+          { label: "Total Bookings", value: totalOrders, icon: Users, color: "text-purple-600", bg: "bg-purple-100" },
         ].map((stat, idx) => (
           <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all group">
             <div className="flex items-center justify-between">
@@ -149,7 +171,24 @@ const VendorDashboard = () => {
         ))}
       </div>
 
-      {/* Services Section */}
+      {/* Tabs */}
+      <div className="flex space-x-4 border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab('services')}
+            className={`py-2 px-4 font-medium transition-colors border-b-2 ${activeTab === 'services' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          >
+            My Services
+          </button>
+          <button
+            onClick={() => setActiveTab('bookings')}
+            className={`py-2 px-4 font-medium transition-colors border-b-2 ${activeTab === 'bookings' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          >
+            Bookings ({bookings.filter(b => b.status === 'PENDING').length} Pending)
+          </button>
+      </div>
+
+      {activeTab === 'services' ? (
+      /* Services Section */
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div>
@@ -315,6 +354,102 @@ const VendorDashboard = () => {
           </div>
         )}
       </div>
+      ) : (
+        /* Bookings Section */
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+             <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+                 <h3 className="text-lg font-bold text-slate-900">Manage Bookings</h3>
+                 <p className="text-sm text-slate-500">Respond to client booking requests</p>
+             </div>
+             
+             {bookings.length === 0 ? (
+                 <div className="p-16 text-center">
+                    <div className="bg-slate-100 p-6 rounded-full inline-block mb-6">
+                        <Calendar className="h-10 w-10 text-slate-400" />
+                    </div>
+                    <h3 className="text-slate-900 text-xl font-bold mb-2">No Bookings Yet</h3>
+                    <p className="text-slate-500 mb-8 max-w-sm mx-auto">When clients book your services, they will appear here.</p>
+                 </div>
+             ) : (
+                <div className="divide-y divide-slate-100">
+                    {bookings.map(booking => (
+                        <div key={booking.id} className="p-6">
+                            <div className="flex flex-col lg:flex-row gap-6">
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h4 className="font-bold text-lg text-slate-900">{booking.service.title}</h4>
+                                        <div className="text-lg font-bold text-indigo-600">Rs. {booking.total_price}</div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm">
+                                        <div className="flex items-center gap-2 text-slate-600">
+                                            <Users className="h-4 w-4 text-indigo-400" />
+                                            <span className="font-medium text-slate-900">Client:</span> {booking.client.name}
+                                        </div>
+                                        <div className="flex items-center gap-2 text-slate-600">
+                                             <Clock className="h-4 w-4 text-indigo-400" />
+                                             <span className="font-medium text-slate-900">Date:</span> {new Date(booking.scheduled_date).toLocaleString()}
+                                        </div>
+                                        <div className="flex items-start gap-2 text-slate-600 col-span-full">
+                                            <div className="mt-0.5"><Edit2 className="h-4 w-4 text-indigo-400" /></div>
+                                            <div>
+                                                <span className="font-medium text-slate-900">Problem:</span> {booking.problem_description}
+                                            </div>
+                                        </div>
+                                         <div className="flex items-start gap-2 text-slate-600 col-span-full">
+                                            <div className="mt-0.5"><Home className="h-4 w-4 text-indigo-400" /></div>
+                                            <div>
+                                                <span className="font-medium text-slate-900">Address:</span> {booking.address}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex flex-col justify-center gap-3 min-w-[200px] border-l border-slate-100 pl-0 lg:pl-6">
+                                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Status</div>
+                                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold w-fit
+                                        ${booking.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                                          booking.status === 'ACCEPTED' ? 'bg-blue-100 text-blue-700' :
+                                          booking.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
+                                          booking.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                                          'bg-gray-100 text-gray-700'}`}>
+                                        {booking.status}
+                                    </div>
+
+                                    <div className="flex gap-2 mt-2">
+                                        {booking.status === 'PENDING' && (
+                                            <>
+                                                <button 
+                                                    onClick={() => handleStatusUpdate(booking.id, 'ACCEPTED')}
+                                                    className="flex-1 bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition flex items-center justify-center gap-1"
+                                                >
+                                                    <Check className="h-4 w-4" /> Accept
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleStatusUpdate(booking.id, 'REJECTED')}
+                                                    className="flex-1 bg-white border border-slate-200 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition flex items-center justify-center gap-1"
+                                                >
+                                                    <X className="h-4 w-4" /> Reject
+                                                </button>
+                                            </>
+                                        )}
+                                        {booking.status === 'ACCEPTED' && (
+                                             <button 
+                                                onClick={() => handleStatusUpdate(booking.id, 'COMPLETED')}
+                                                className="w-full bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition flex items-center justify-center gap-1"
+                                            >
+                                                <CheckCircle className="h-4 w-4" /> Mark Completed
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+             )}
+        </div>
+      )}
     </div>
   );
 };

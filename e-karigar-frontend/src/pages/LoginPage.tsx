@@ -25,6 +25,7 @@ const LoginPage = () => {
       const response = await api.post("/auth/login", formData);
       localStorage.setItem("token", response.data.access_token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
+      localStorage.setItem("role", response.data.user.role);
 
       const redirect = searchParams.get("redirect");
       navigate(redirect || "/dashboard");

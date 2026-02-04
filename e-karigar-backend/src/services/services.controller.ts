@@ -37,4 +37,9 @@ export class ServicesController {
   async delete(@Request() req, @Param('id') id: string) {
     return this.servicesService.deleteService(req.user.sub, id);
   }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.servicesService.findOne(id);
+  }
 }

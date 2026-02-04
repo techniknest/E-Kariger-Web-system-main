@@ -29,6 +29,7 @@ const RegisterPage = () => {
       // Auto-login: Save Token and User Info
       localStorage.setItem("token", response.data.access_token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
+      localStorage.setItem("role", response.data.user.role);
 
       // Redirect to Dashboard
       navigate("/dashboard");
