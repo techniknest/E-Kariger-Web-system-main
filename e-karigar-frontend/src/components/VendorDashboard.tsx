@@ -15,13 +15,13 @@ interface Service {
 const VendorDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'services' | 'bookings'>('services');
-  
+
   const [services, setServices] = useState<Service[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
-  
+
   const [loading, setLoading] = useState(true);
-  const [loadingBookings, setLoadingBookings] = useState(false);
-  
+
+
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -51,13 +51,13 @@ const VendorDashboard = () => {
   }, []);
 
   const handleStatusUpdate = async (id: string, status: string) => {
-      try {
-          await bookingsApi.updateStatus(id, status);
-          // Refresh bookings locally
-          setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
-      } catch (error) {
-          alert("Failed to update status");
-      }
+    try {
+      await bookingsApi.updateStatus(id, status);
+      // Refresh bookings locally
+      setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
+    } catch (error) {
+      alert("Failed to update status");
+    }
   };
 
   // Handle Create or Update Service
@@ -173,281 +173,281 @@ const VendorDashboard = () => {
 
       {/* Tabs */}
       <div className="flex space-x-4 border-b border-gray-200">
-          <button
-            onClick={() => setActiveTab('services')}
-            className={`py-2 px-4 font-medium transition-colors border-b-2 ${activeTab === 'services' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-          >
-            My Services
-          </button>
-          <button
-            onClick={() => setActiveTab('bookings')}
-            className={`py-2 px-4 font-medium transition-colors border-b-2 ${activeTab === 'bookings' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-          >
-            Bookings ({bookings.filter(b => b.status === 'PENDING').length} Pending)
-          </button>
+        <button
+          onClick={() => setActiveTab('services')}
+          className={`py-2 px-4 font-medium transition-colors border-b-2 ${activeTab === 'services' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+        >
+          My Services
+        </button>
+        <button
+          onClick={() => setActiveTab('bookings')}
+          className={`py-2 px-4 font-medium transition-colors border-b-2 ${activeTab === 'bookings' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+        >
+          Bookings ({bookings.filter(b => b.status === 'PENDING').length} Pending)
+        </button>
       </div>
 
       {activeTab === 'services' ? (
-      /* Services Section */
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <div>
-            <h3 className="text-lg font-bold text-slate-900">My Services</h3>
-            <p className="text-sm text-slate-500">Manage your service listings</p>
+        /* Services Section */
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">My Services</h3>
+              <p className="text-sm text-slate-500">Manage your service listings</p>
+            </div>
+
+            {!showForm && (
+              <button
+                onClick={() => {
+                  setEditingServiceId(null);
+                  setFormData({ title: "", description: "", price: "" });
+                  setShowForm(true);
+                }}
+                className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 font-medium"
+              >
+                <Plus className="h-4 w-4" />
+                Add New Service
+              </button>
+            )}
           </div>
 
-          {!showForm && (
-            <button
-              onClick={() => {
-                setEditingServiceId(null);
-                setFormData({ title: "", description: "", price: "" });
-                setShowForm(true);
-              }}
-              className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 font-medium"
-            >
-              <Plus className="h-4 w-4" />
-              Add New Service
-            </button>
-          )}
-        </div>
+          {/* Add/Edit Service Form */}
+          {showForm && (
+            <div className="p-8 bg-slate-50 border-b border-slate-200 animate-in slide-in-from-top-2">
+              <div className="max-w-3xl mx-auto">
+                <h4 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                  {editingServiceId ? <Edit2 className="h-5 w-5 text-indigo-500" /> : <Plus className="h-5 w-5 text-indigo-500" />}
+                  {editingServiceId ? "Edit Service Details" : "Create a New Service"}
+                </h4>
 
-        {/* Add/Edit Service Form */}
-        {showForm && (
-          <div className="p-8 bg-slate-50 border-b border-slate-200 animate-in slide-in-from-top-2">
-            <div className="max-w-3xl mx-auto">
-              <h4 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                {editingServiceId ? <Edit2 className="h-5 w-5 text-indigo-500" /> : <Plus className="h-5 w-5 text-indigo-500" />}
-                {editingServiceId ? "Edit Service Details" : "Create a New Service"}
-              </h4>
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Service Title
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-white"
+                        placeholder="e.g., AC Repair & Servicing"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Starting Price (Rs)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-3.5 text-slate-400 text-sm">Rs.</span>
+                        <input
+                          type="number"
+                          className="w-full p-3 pl-10 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-white"
+                          placeholder="500"
+                          value={formData.price}
+                          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                          required
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Service Title
+                      Description
                     </label>
-                    <input
-                      type="text"
-                      className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-white"
-                      placeholder="e.g., AC Repair & Servicing"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    <textarea
+                      className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none resize-none transition bg-white"
+                      rows={4}
+                      placeholder="Describe your service in detail..."
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Starting Price (Rs)
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-3.5 text-slate-400 text-sm">Rs.</span>
-                      <input
-                        type="number"
-                        className="w-full p-3 pl-10 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-white"
-                        placeholder="500"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                        required
-                        min="0"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Description
-                  </label>
-                  <textarea
-                    className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none resize-none transition bg-white"
-                    rows={4}
-                    placeholder="Describe your service in detail..."
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="flex justify-end gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={cancelEdit}
-                    className="px-6 py-2.5 text-slate-600 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl transition font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="px-8 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-md disabled:opacity-50 flex items-center gap-2 font-medium"
-                  >
-                    {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {editingServiceId ? "Update Service" : "Publish Service"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Service List */}
-        {services.length === 0 && !showForm ? (
-          <div className="p-16 text-center">
-            <div className="bg-slate-100 p-6 rounded-full inline-block mb-6">
-              <Archive className="h-10 w-10 text-slate-400" />
-            </div>
-            <h3 className="text-slate-900 text-xl font-bold mb-2">No Services Yet</h3>
-            <p className="text-slate-500 mb-8 max-w-sm mx-auto">Create your first service to start receiving bookings from local customers.</p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="px-8 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-lg font-bold"
-            >
-              Add Your First Service
-            </button>
-          </div>
-        ) : !showForm && (
-          <div className="divide-y divide-slate-100">
-            {services.map((service) => (
-              <div key={service.id} className="p-6 hover:bg-slate-50/50 transition-colors group">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h4 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">{service.title}</h4>
-                      <span
-                        className={`px-2.5 py-0.5 text-xs font-bold rounded-full border ${service.is_active
-                          ? "bg-emerald-100 text-emerald-700 border-emerald-200"
-                          : "bg-slate-100 text-slate-600 border-slate-200"
-                          }`}
-                      >
-                        {service.is_active ? "ACTIVE" : "INACTIVE"}
-                      </span>
-                    </div>
-                    <p className="text-slate-600 text-sm line-clamp-2 mb-3 max-w-2xl">{service.description}</p>
-                    <div className="flex items-center gap-6 text-sm text-slate-500 font-medium">
-                      <span className="flex items-center gap-1 text-slate-900">
-                        <DollarSign className="h-4 w-4 text-emerald-500" />
-                        Rs. {service.price}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        Created {new Date(service.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
+                  <div className="flex justify-end gap-3 pt-2">
                     <button
-                      onClick={() => handleEdit(service)}
-                      className="px-4 py-2 text-slate-600 hover:bg-white border border-transparent hover:border-slate-200 hover:shadow-sm rounded-lg transition text-sm font-medium flex items-center gap-2"
+                      type="button"
+                      onClick={cancelEdit}
+                      className="px-6 py-2.5 text-slate-600 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl transition font-medium"
                     >
-                      <Edit2 className="h-3.5 w-3.5" />
-                      Edit
+                      Cancel
                     </button>
                     <button
-                      onClick={() => handleDelete(service.id)}
-                      className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition text-sm font-medium flex items-center gap-2"
+                      type="submit"
+                      disabled={submitting}
+                      className="px-8 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-md disabled:opacity-50 flex items-center gap-2 font-medium"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      Delete
+                      {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                      {editingServiceId ? "Update Service" : "Publish Service"}
                     </button>
                   </div>
-                </div>
+                </form>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+
+          {/* Service List */}
+          {services.length === 0 && !showForm ? (
+            <div className="p-16 text-center">
+              <div className="bg-slate-100 p-6 rounded-full inline-block mb-6">
+                <Archive className="h-10 w-10 text-slate-400" />
+              </div>
+              <h3 className="text-slate-900 text-xl font-bold mb-2">No Services Yet</h3>
+              <p className="text-slate-500 mb-8 max-w-sm mx-auto">Create your first service to start receiving bookings from local customers.</p>
+              <button
+                onClick={() => setShowForm(true)}
+                className="px-8 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-lg font-bold"
+              >
+                Add Your First Service
+              </button>
+            </div>
+          ) : !showForm && (
+            <div className="divide-y divide-slate-100">
+              {services.map((service) => (
+                <div key={service.id} className="p-6 hover:bg-slate-50/50 transition-colors group">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">{service.title}</h4>
+                        <span
+                          className={`px-2.5 py-0.5 text-xs font-bold rounded-full border ${service.is_active
+                            ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                            : "bg-slate-100 text-slate-600 border-slate-200"
+                            }`}
+                        >
+                          {service.is_active ? "ACTIVE" : "INACTIVE"}
+                        </span>
+                      </div>
+                      <p className="text-slate-600 text-sm line-clamp-2 mb-3 max-w-2xl">{service.description}</p>
+                      <div className="flex items-center gap-6 text-sm text-slate-500 font-medium">
+                        <span className="flex items-center gap-1 text-slate-900">
+                          <DollarSign className="h-4 w-4 text-emerald-500" />
+                          Rs. {service.price}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          Created {new Date(service.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEdit(service)}
+                        className="px-4 py-2 text-slate-600 hover:bg-white border border-transparent hover:border-slate-200 hover:shadow-sm rounded-lg transition text-sm font-medium flex items-center gap-2"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(service.id)}
+                        className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition text-sm font-medium flex items-center gap-2"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       ) : (
         /* Bookings Section */
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-             <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
-                 <h3 className="text-lg font-bold text-slate-900">Manage Bookings</h3>
-                 <p className="text-sm text-slate-500">Respond to client booking requests</p>
-             </div>
-             
-             {bookings.length === 0 ? (
-                 <div className="p-16 text-center">
-                    <div className="bg-slate-100 p-6 rounded-full inline-block mb-6">
-                        <Calendar className="h-10 w-10 text-slate-400" />
-                    </div>
-                    <h3 className="text-slate-900 text-xl font-bold mb-2">No Bookings Yet</h3>
-                    <p className="text-slate-500 mb-8 max-w-sm mx-auto">When clients book your services, they will appear here.</p>
-                 </div>
-             ) : (
-                <div className="divide-y divide-slate-100">
-                    {bookings.map(booking => (
-                        <div key={booking.id} className="p-6">
-                            <div className="flex flex-col lg:flex-row gap-6">
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h4 className="font-bold text-lg text-slate-900">{booking.service.title}</h4>
-                                        <div className="text-lg font-bold text-indigo-600">Rs. {booking.total_price}</div>
-                                    </div>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm">
-                                        <div className="flex items-center gap-2 text-slate-600">
-                                            <Users className="h-4 w-4 text-indigo-400" />
-                                            <span className="font-medium text-slate-900">Client:</span> {booking.client.name}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-slate-600">
-                                             <Clock className="h-4 w-4 text-indigo-400" />
-                                             <span className="font-medium text-slate-900">Date:</span> {new Date(booking.scheduled_date).toLocaleString()}
-                                        </div>
-                                        <div className="flex items-start gap-2 text-slate-600 col-span-full">
-                                            <div className="mt-0.5"><Edit2 className="h-4 w-4 text-indigo-400" /></div>
-                                            <div>
-                                                <span className="font-medium text-slate-900">Problem:</span> {booking.problem_description}
-                                            </div>
-                                        </div>
-                                         <div className="flex items-start gap-2 text-slate-600 col-span-full">
-                                            <div className="mt-0.5"><Home className="h-4 w-4 text-indigo-400" /></div>
-                                            <div>
-                                                <span className="font-medium text-slate-900">Address:</span> {booking.address}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div className="flex flex-col justify-center gap-3 min-w-[200px] border-l border-slate-100 pl-0 lg:pl-6">
-                                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Status</div>
-                                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold w-fit
-                                        ${booking.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                                          booking.status === 'ACCEPTED' ? 'bg-blue-100 text-blue-700' :
-                                          booking.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
-                                          booking.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
-                                          'bg-gray-100 text-gray-700'}`}>
-                                        {booking.status}
-                                    </div>
+          <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+            <h3 className="text-lg font-bold text-slate-900">Manage Bookings</h3>
+            <p className="text-sm text-slate-500">Respond to client booking requests</p>
+          </div>
 
-                                    <div className="flex gap-2 mt-2">
-                                        {booking.status === 'PENDING' && (
-                                            <>
-                                                <button 
-                                                    onClick={() => handleStatusUpdate(booking.id, 'ACCEPTED')}
-                                                    className="flex-1 bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition flex items-center justify-center gap-1"
-                                                >
-                                                    <Check className="h-4 w-4" /> Accept
-                                                </button>
-                                                <button 
-                                                    onClick={() => handleStatusUpdate(booking.id, 'REJECTED')}
-                                                    className="flex-1 bg-white border border-slate-200 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition flex items-center justify-center gap-1"
-                                                >
-                                                    <X className="h-4 w-4" /> Reject
-                                                </button>
-                                            </>
-                                        )}
-                                        {booking.status === 'ACCEPTED' && (
-                                             <button 
-                                                onClick={() => handleStatusUpdate(booking.id, 'COMPLETED')}
-                                                className="w-full bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition flex items-center justify-center gap-1"
-                                            >
-                                                <CheckCircle className="h-4 w-4" /> Mark Completed
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+          {bookings.length === 0 ? (
+            <div className="p-16 text-center">
+              <div className="bg-slate-100 p-6 rounded-full inline-block mb-6">
+                <Calendar className="h-10 w-10 text-slate-400" />
+              </div>
+              <h3 className="text-slate-900 text-xl font-bold mb-2">No Bookings Yet</h3>
+              <p className="text-slate-500 mb-8 max-w-sm mx-auto">When clients book your services, they will appear here.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {bookings.map(booking => (
+                <div key={booking.id} className="p-6">
+                  <div className="flex flex-col lg:flex-row gap-6">
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-bold text-lg text-slate-900">{booking.service.title}</h4>
+                        <div className="text-lg font-bold text-indigo-600">Rs. {booking.total_price}</div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm">
+                        <div className="flex items-center gap-2 text-slate-600">
+                          <Users className="h-4 w-4 text-indigo-400" />
+                          <span className="font-medium text-slate-900">Client:</span> {booking.client.name}
                         </div>
-                    ))}
+                        <div className="flex items-center gap-2 text-slate-600">
+                          <Clock className="h-4 w-4 text-indigo-400" />
+                          <span className="font-medium text-slate-900">Date:</span> {new Date(booking.scheduled_date).toLocaleString()}
+                        </div>
+                        <div className="flex items-start gap-2 text-slate-600 col-span-full">
+                          <div className="mt-0.5"><Edit2 className="h-4 w-4 text-indigo-400" /></div>
+                          <div>
+                            <span className="font-medium text-slate-900">Problem:</span> {booking.problem_description}
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2 text-slate-600 col-span-full">
+                          <div className="mt-0.5"><Home className="h-4 w-4 text-indigo-400" /></div>
+                          <div>
+                            <span className="font-medium text-slate-900">Address:</span> {booking.address}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col justify-center gap-3 min-w-[200px] border-l border-slate-100 pl-0 lg:pl-6">
+                      <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Status</div>
+                      <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold w-fit
+                                        ${booking.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                          booking.status === 'ACCEPTED' ? 'bg-blue-100 text-blue-700' :
+                            booking.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
+                              booking.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                                'bg-gray-100 text-gray-700'}`}>
+                        {booking.status}
+                      </div>
+
+                      <div className="flex gap-2 mt-2">
+                        {booking.status === 'PENDING' && (
+                          <>
+                            <button
+                              onClick={() => handleStatusUpdate(booking.id, 'ACCEPTED')}
+                              className="flex-1 bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition flex items-center justify-center gap-1"
+                            >
+                              <Check className="h-4 w-4" /> Accept
+                            </button>
+                            <button
+                              onClick={() => handleStatusUpdate(booking.id, 'REJECTED')}
+                              className="flex-1 bg-white border border-slate-200 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition flex items-center justify-center gap-1"
+                            >
+                              <X className="h-4 w-4" /> Reject
+                            </button>
+                          </>
+                        )}
+                        {booking.status === 'ACCEPTED' && (
+                          <button
+                            onClick={() => handleStatusUpdate(booking.id, 'COMPLETED')}
+                            className="w-full bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition flex items-center justify-center gap-1"
+                          >
+                            <CheckCircle className="h-4 w-4" /> Mark Completed
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-             )}
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
