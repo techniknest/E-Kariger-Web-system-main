@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import BecomeVendorPage from "./pages/BecomeVendorPage";
+import ServiceDetailsPage from "./pages/ServiceDetailsPage";
 
 // Security Wrapper: Checks if token exists before showing protected pages
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
@@ -29,6 +30,7 @@ function App() {
       <Routes>
         {/* PUBLIC ROUTES */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/services/:id" element={<ServiceDetailsPage />} />
 
         {/* AUTH ROUTES - Redirect if logged in */}
         <Route

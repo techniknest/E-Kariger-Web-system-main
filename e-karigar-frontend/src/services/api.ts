@@ -14,12 +14,12 @@ api.interceptors.request.use(
   (config) => {
     // Get the token from local storage
     const token = localStorage.getItem("token");
-    
+
     // If token exists, attach it to the header
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error) => {
@@ -28,3 +28,37 @@ api.interceptors.request.use(
 );
 
 export default api;
+
+export interface CreateBookingPayload {
+  serviceId: string;
+  scheduledDate: string;
+  problemDescription: string;
+  address: string;
+  totalPrice: number;
+}
+
+export const bookingsApi = {
+  create: async (data: CreateBookingPayload) => {
+    const response = await api.post("/bookings", data);
+    return response.data;
+  },
+  getClientBookings: async () => {
+    const response = await api.get("/bookings/client");
+    return response.data;
+  },
+  getVendorBookings: async () => {
+    const response = await api.get("/bookings/vendor");
+    return response.data;
+  },
+  updateStatus: async (id: string, status: string) => {
+    const response = await api.patch(`/bookings/${id}/status`, { status });
+    return response.data;
+  }
+};
+
+export const servicesApi = {
+  getById: async (id: string) => {
+    const response = await api.get(`/services/${id}`);
+    return response.data;
+  }
+};

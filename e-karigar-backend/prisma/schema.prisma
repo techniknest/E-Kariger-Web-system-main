@@ -17,14 +17,13 @@ enum UserRole {
 }
 
 enum BookingStatus {
-  CREATED
-  PENDING_APPROVAL
+  PENDING
   ACCEPTED
-  IN_PROGRESS
+  REJECTED
   COMPLETED
   CANCELLED
-  EXPIRED
 }
+
 
 enum VendorVerificationStatus {
   PENDING
@@ -112,15 +111,17 @@ model Service {
 }
 
 model Booking {
-  id         String        @id @default(uuid())
-  client_id  String
-  vendor_id  String
-  service_id String
-  status     BookingStatus @default(CREATED)
-  location   String
-  expires_at DateTime?
-  created_at DateTime      @default(now())
-  updated_at DateTime      @updatedAt
+  id                  String        @id @default(uuid())
+  client_id           String
+  vendor_id           String
+  service_id          String
+  status              BookingStatus @default(PENDING)
+  problem_description String
+  scheduled_date      DateTime
+  address             String
+  total_price         Decimal       @db.Decimal(10, 2)
+  created_at          DateTime      @default(now())
+  updated_at          DateTime      @updatedAt
 
   client      User              @relation("ClientBookings", fields: [client_id], references: [id])
   vendor      VendorProfile     @relation("VendorBookings", fields: [vendor_id], references: [id])
