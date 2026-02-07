@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,76 +7,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// --- ENUMS ---
-enum UserRole {
-  ADMIN
-  VENDOR
-  CLIENT
-}
-
-enum BookingStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-  COMPLETED
-  CANCELLED
-}
-
-
-enum VendorVerificationStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-// --- MODELS ---
-
 model User {
-  id            String   @id @default(uuid())
-  name          String
-  email         String   @unique
-  phone         String?  @unique  // Optional for minimal-friction registration
-  password_hash String
-  role          UserRole
-  is_active     Boolean  @default(true)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-
-  vendor_profile  VendorProfile?
-  client_bookings Booking[]       @relation("ClientBookings")
-  reviews_written Review[]
-  sent_messages   ChatMessage[]
+  id              String          @id @default(uuid())
+  name            String
+  email           String          @unique
+  phone           String?         @unique
+  password_hash   String
+  role            UserRole
+  is_active       Boolean         @default(true)
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
   admin_logs      AdminAuditLog[]
+  client_bookings Booking[]       @relation("ClientBookings")
+  sent_messages   ChatMessage[]
+  reviews_written Review[]
+  vendor_profile  VendorProfile?
 
   @@map("users")
 }
 
 model VendorProfile {
-  id                 String                   @id @default(uuid())
-  user_id            String                   @unique
-  
-  // SRS Fields
-  vendor_type        String                   @default("INDIVIDUAL") // Individual, Team, Company
-  approval_status    VendorVerificationStatus @default(PENDING)      // Blocks login until APPROVED
-  
-  description        String?
-  city               String?
-  is_verified        Boolean                  @default(false)
-  verification_badge Boolean                  @default(false)
-  
-  // New fields for Become a Seller application
-  cnic               String?                  @unique  // National ID (CNIC) for verification
-  business_phone     String?                           // Business contact number  
-  experience_years   Int?                              // Years of experience
-  
-  created_at         DateTime                 @default(now())
-  updated_at         DateTime                 @updatedAt
-
-  user                 User                 @relation(fields: [user_id], references: [id])
-  services             Service[]
-  vendor_bookings      Booking[]            @relation("VendorBookings")
-  verification_records VerificationRecord[]
+  id                   String                   @id @default(uuid())
+  user_id              String                   @unique
+  vendor_type          String                   @default("INDIVIDUAL")
+  approval_status      VendorVerificationStatus @default(PENDING)
+  description          String?
+  city                 String?
+  is_verified          Boolean                  @default(false)
+  verification_badge   Boolean                  @default(false)
+  created_at           DateTime                 @default(now())
+  updated_at           DateTime                 @updatedAt
+  business_phone       String?
+  cnic                 String?                  @unique
+  experience_years     Int?
+  vendor_bookings      Booking[]                @relation("VendorBookings")
   reviews_received     Review[]
+  services             Service[]
+  user                 User                     @relation(fields: [user_id], references: [id])
+  verification_records VerificationRecord[]
 
   @@map("vendor_profiles")
 }
@@ -93,42 +59,40 @@ model Category {
 }
 
 model Service {
-  id          String   @id @default(uuid())
+  id          String        @id @default(uuid())
   vendor_id   String
   category_id String
   title       String
   description String?
-  price       Decimal  @db.Decimal(10, 2)
-  is_active   Boolean  @default(true)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-
-  vendor   VendorProfile @relation(fields: [vendor_id], references: [id])
-  category Category      @relation(fields: [category_id], references: [id])
-  bookings Booking[]
+  price       Decimal       @db.Decimal(10, 2)
+  is_active   Boolean       @default(true)
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  bookings    Booking[]
+  category    Category      @relation(fields: [category_id], references: [id])
+  vendor      VendorProfile @relation(fields: [vendor_id], references: [id])
 
   @@map("services")
 }
 
 model Booking {
-  id                  String        @id @default(uuid())
+  id                  String             @id @default(uuid())
   client_id           String
   vendor_id           String
   service_id          String
-  status              BookingStatus @default(PENDING)
+  status              BookingStatus      @default(PENDING)
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @updatedAt
+  address             String
   problem_description String
   scheduled_date      DateTime
-  address             String
-  total_price         Decimal       @db.Decimal(10, 2)
-  created_at          DateTime      @default(now())
-  updated_at          DateTime      @updatedAt
-
-  client      User              @relation("ClientBookings", fields: [client_id], references: [id])
-  vendor      VendorProfile     @relation("VendorBookings", fields: [vendor_id], references: [id])
-  service     Service           @relation(fields: [service_id], references: [id])
-  status_logs BookingStatusLog[]
-  chat_room   ChatRoom?
-  review      Review?
+  total_price         Decimal            @db.Decimal(10, 2)
+  status_logs         BookingStatusLog[]
+  client              User               @relation("ClientBookings", fields: [client_id], references: [id])
+  service             Service            @relation(fields: [service_id], references: [id])
+  vendor              VendorProfile      @relation("VendorBookings", fields: [vendor_id], references: [id])
+  chat_room           ChatRoom?
+  review              Review?
 
   @@map("bookings")
 }
@@ -140,19 +104,17 @@ model BookingStatusLog {
   new_status BookingStatus
   changed_by String
   changed_at DateTime       @default(now())
-
-  booking Booking @relation(fields: [booking_id], references: [id])
+  booking    Booking        @relation(fields: [booking_id], references: [id])
 
   @@map("booking_status_logs")
 }
 
 model ChatRoom {
-  id         String   @id @default(uuid())
-  booking_id String   @unique
-  created_at DateTime @default(now())
-
-  booking  Booking       @relation(fields: [booking_id], references: [id])
-  messages ChatMessage[]
+  id         String        @id @default(uuid())
+  booking_id String        @unique
+  created_at DateTime      @default(now())
+  messages   ChatMessage[]
+  booking    Booking       @relation(fields: [booking_id], references: [id])
 
   @@map("chat_rooms")
 }
@@ -163,38 +125,35 @@ model ChatMessage {
   sender_id  String
   message    String
   created_at DateTime @default(now())
-
-  room   ChatRoom @relation(fields: [room_id], references: [id])
-  sender User     @relation(fields: [sender_id], references: [id])
+  room       ChatRoom @relation(fields: [room_id], references: [id])
+  sender     User     @relation(fields: [sender_id], references: [id])
 
   @@map("chat_messages")
 }
 
 model Review {
-  id         String   @id @default(uuid())
-  booking_id String   @unique
+  id         String        @id @default(uuid())
+  booking_id String        @unique
   client_id  String
   vendor_id  String
   rating     Int
   comment    String?
-  created_at DateTime @default(now())
-
-  booking Booking       @relation(fields: [booking_id], references: [id])
-  client  User          @relation(fields: [client_id], references: [id])
-  vendor  VendorProfile @relation(fields: [vendor_id], references: [id])
+  created_at DateTime      @default(now())
+  booking    Booking       @relation(fields: [booking_id], references: [id])
+  client     User          @relation(fields: [client_id], references: [id])
+  vendor     VendorProfile @relation(fields: [vendor_id], references: [id])
 
   @@map("reviews")
 }
 
 model VerificationRecord {
-  id           String    @id @default(uuid())
+  id           String        @id @default(uuid())
   vendor_id    String
   document_url String
   status       String
   reviewed_by  String?
   reviewed_at  DateTime?
-
-  vendor VendorProfile @relation(fields: [vendor_id], references: [id])
+  vendor       VendorProfile @relation(fields: [vendor_id], references: [id])
 
   @@map("verification_records")
 }
@@ -206,8 +165,27 @@ model AdminAuditLog {
   target_type String
   target_id   String
   created_at  DateTime @default(now())
-
-  admin User @relation(fields: [admin_id], references: [id])
+  admin       User     @relation(fields: [admin_id], references: [id])
 
   @@map("admin_audit_logs")
+}
+
+enum UserRole {
+  ADMIN
+  VENDOR
+  CLIENT
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum VendorVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
