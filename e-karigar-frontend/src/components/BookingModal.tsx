@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Calendar, MapPin, AlertCircle, Loader } from "lucide-react";
+import { X, Calendar, MapPin, AlertCircle, Loader2, FileText, CheckCircle } from "lucide-react";
 import { bookingsApi } from "../services/api";
 import { useNavigate } from "react-router-dom";
 
@@ -35,7 +35,8 @@ const BookingModal = ({ service, isOpen, onClose }: BookingModalProps) => {
                 totalPrice: Number(service.price)
             });
 
-            alert("Booking confirmed successfully!");
+            // Show success message or redirect
+            // For now, simple alert and close
             onClose();
             navigate("/client-dashboard"); // Redirect to Client Dashboard
         } catch (err: any) {
@@ -48,100 +49,131 @@ const BookingModal = ({ service, isOpen, onClose }: BookingModalProps) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop Blur */}
             <div
-                className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-all"
                 onClick={onClose}
             ></div>
 
-            <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                    <h3 className="text-xl font-bold text-slate-900">Book {service.title}</h3>
+            {/* Modal Content */}
+            <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                {/* Header */}
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+                    <div>
+                        <h3 className="text-xl font-bold text-slate-900">Confirm Booking</h3>
+                        <p className="text-sm text-slate-500">Service: {service.title}</p>
+                    </div>
                     <button
                         onClick={onClose}
-                        className="text-slate-400 hover:text-slate-600 transition-colors"
+                        className="p-2 -mr-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
                     >
                         <X className="h-5 w-5" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     {error && (
-                        <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4" />
-                            {error}
+                        <div className="p-4 bg-red-50 text-red-600 text-sm rounded-xl flex items-start gap-3 border border-red-100">
+                            <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                            <p>{error}</p>
                         </div>
                     )}
 
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Select Date & Time
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                                <Calendar className="h-5 w-5" />
+                    <div className="space-y-4">
+                        {/* Date & Time */}
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                                Select Date & Time
+                            </label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                                    <Calendar className="h-5 w-5" />
+                                </div>
+                                <input
+                                    type="datetime-local"
+                                    required
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white outline-none transition-all placeholder:text-slate-400 font-medium"
+                                    value={formData.scheduledDate}
+                                    onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
+                                />
                             </div>
-                            <input
-                                type="datetime-local"
-                                required
-                                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
-                                value={formData.scheduledDate}
-                                onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
-                            />
+                        </div>
+
+                        {/* Address */}
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                                Service Location
+                            </label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                                    <MapPin className="h-5 w-5" />
+                                </div>
+                                <input
+                                    type="text"
+                                    required
+                                    placeholder="House #, Street, Area..."
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white outline-none transition-all placeholder:text-slate-400 font-medium"
+                                    value={formData.address}
+                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Description */}
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                                What's the issue?
+                            </label>
+                            <div className="relative group">
+                                <div className="absolute top-3 left-3 pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                                    <FileText className="h-5 w-5" />
+                                </div>
+                                <textarea
+                                    required
+                                    rows={3}
+                                    placeholder="Briefly describe the problem..."
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white outline-none transition-all placeholder:text-slate-400 resize-none font-medium"
+                                    value={formData.problemDescription}
+                                    onChange={(e) => setFormData({ ...formData, problemDescription: e.target.value })}
+                                ></textarea>
+                            </div>
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Location / Address
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                                <MapPin className="h-5 w-5" />
-                            </div>
-                            <input
-                                type="text"
-                                required
-                                placeholder="House #123, Street 4, City..."
-                                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
-                                value={formData.address}
-                                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                            />
+                    {/* Total Price Highlight */}
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-dashed border-slate-200 flex items-center justify-between mt-6">
+                        <div className="flex flex-col">
+                            <span className="text-sm font-medium text-slate-500">Estimated Total</span>
+                            <span className="text-xs text-slate-400">Payment after service</span>
                         </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Problem Description
-                        </label>
-                        <textarea
-                            required
-                            rows={3}
-                            placeholder="Describe the issue briefly..."
-                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all resize-none"
-                            value={formData.problemDescription}
-                            onChange={(e) => setFormData({ ...formData, problemDescription: e.target.value })}
-                        ></textarea>
-                    </div>
-
-                    <div className="bg-indigo-50 p-4 rounded-xl flex items-center justify-between">
-                        <span className="text-indigo-900 font-medium">Total Price</span>
-                        <span className="text-2xl font-bold text-indigo-700">Rs. {service.price}</span>
+                        <div className="flex items-center gap-2">
+                            <div className="text-3xl font-extrabold text-slate-900">
+                                Rs. {service.price}
+                            </div>
+                        </div>
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-[0.98]"
                     >
                         {loading ? (
                             <>
-                                <Loader className="h-5 w-5 animate-spin" />
+                                <Loader2 className="h-5 w-5 animate-spin" />
                                 Processing...
                             </>
                         ) : (
-                            "Confirm Booking"
+                            <>
+                                <CheckCircle className="h-5 w-5" />
+                                Confirm Booking
+                            </>
                         )}
                     </button>
+
+                    <p className="text-center text-xs text-slate-400 mt-2">
+                        By confirming, you agree to our Terms of Service.
+                    </p>
                 </form>
             </div>
         </div>

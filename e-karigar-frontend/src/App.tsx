@@ -5,6 +5,10 @@ import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import BecomeVendorPage from "./pages/BecomeVendorPage";
 import ServiceDetailsPage from "./pages/ServiceDetailsPage";
+import DashboardLayoutWrapper from "./layouts/DashboardLayoutWrapper";
+import VendorVerificationList from "./components/admin/VendorVerificationList";
+import JobRequestManager from "./components/vendor/JobRequestManager";
+
 
 // Security Wrapper: Checks if token exists before showing protected pages
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
@@ -53,14 +57,11 @@ function App() {
         <Route path="/join" element={<Navigate to="/register" replace />} />
 
         {/* PROTECTED ROUTES */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/dashboard" element={<DashboardLayoutWrapper />}>
+          <Route index element={<DashboardPage />} />
+          <Route path="verification" element={<VendorVerificationList />} />
+          <Route path="jobs" element={<JobRequestManager />} />
+        </Route>
         <Route
           path="/become-vendor"
           element={
