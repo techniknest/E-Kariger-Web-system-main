@@ -8,6 +8,7 @@ interface Service {
   title: string;
   description: string;
   price: number;
+  images: string[];
   is_active: boolean;
   created_at: string;
 }
@@ -24,11 +25,17 @@ const VendorDashboard = () => {
 
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Edit Mode State
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({ title: "", description: "", price: "" });
+  const [formData, setFormData] = useState<{ title: string; description: string; price: string; imageFile: File | null }>({
+    title: "",
+    description: "",
+    price: "",
+    imageFile: null
+  });
 
   // Fetch Data
   const fetchData = async () => {
@@ -64,29 +71,44 @@ const VendorDashboard = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setUploadProgress(0);
+
+    const data = new FormData();
+    data.append('title', formData.title);
+    data.append('description', formData.description);
+    data.append('price', formData.price);
+    if (formData.imageFile) {
+      data.append('image', formData.imageFile);
+    }
+
     try {
+      const config = {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (progressEvent: any) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setUploadProgress(percentCompleted);
+        }
+      };
+
       if (editingServiceId) {
         // UPDATE Existing Service
-        await api.patch(`/services/${editingServiceId}`, {
-          ...formData,
-          price: parseFloat(formData.price),
-        });
+        await api.patch(`/services/${editingServiceId}`, data, config);
       } else {
         // CREATE New Service
-        await api.post("/services", {
-          ...formData,
-          price: parseFloat(formData.price),
-        });
+        await api.post("/services", data, config);
       }
 
       setShowForm(false);
       setEditingServiceId(null);
-      setFormData({ title: "", description: "", price: "" });
+      setFormData({ title: "", description: "", price: "", imageFile: null });
+      setUploadProgress(0);
       fetchData(); // Refresh all data
-    } catch (err) {
-      alert(editingServiceId ? "Failed to update service" : "Failed to create service");
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || "Failed to save service";
+      alert(`Error: ${errorMessage}`);
     } finally {
       setSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -96,7 +118,8 @@ const VendorDashboard = () => {
     setFormData({
       title: service.title,
       description: service.description,
-      price: service.price.toString()
+      price: service.price.toString(),
+      imageFile: null // Reset file input on edit, existing image stays unless replaced
     });
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -118,7 +141,7 @@ const VendorDashboard = () => {
   const cancelEdit = () => {
     setShowForm(false);
     setEditingServiceId(null);
-    setFormData({ title: "", description: "", price: "" });
+    setFormData({ title: "", description: "", price: "", imageFile: null });
   }
 
   // Calculate stats
@@ -200,7 +223,7 @@ const VendorDashboard = () => {
               <button
                 onClick={() => {
                   setEditingServiceId(null);
-                  setFormData({ title: "", description: "", price: "" });
+                  setFormData({ title: "", description: "", price: "", imageFile: null });
                   setShowForm(true);
                 }}
                 className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 font-medium"
@@ -265,6 +288,28 @@ const VendorDashboard = () => {
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       required
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Service Image (Max 1MB)
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg, image/jpg"
+                      className="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 1024 * 1024) {
+                            alert("File size must be less than 1MB");
+                            e.target.value = ""; // Reset input
+                            return;
+                          }
+                          setFormData({ ...formData, imageFile: file });
+                        }
+                      }}
+                    />
+                    <p className="text-xs text-slate-500 mt-1">Upload a clear image of your service.</p>
                   </div>
                   <div className="flex justify-end gap-3 pt-2">
                     <button

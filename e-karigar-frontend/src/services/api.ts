@@ -53,10 +53,26 @@ export const bookingsApi = {
   updateStatus: async (id: string, status: string) => {
     const response = await api.patch(`/bookings/${id}/status`, { status });
     return response.data;
-  }
+  },
+  startJob: async (id: string, otp: string) => {
+    const response = await api.post(`/bookings/${id}/start`, { otp });
+    return response.data;
+  },
+  reviseQuote: async (id: string, new_price: number, reason: string) => {
+    const response = await api.patch(`/bookings/${id}/revise`, { new_price, reason });
+    return response.data;
+  },
+  approveRevision: async (id: string, approved: boolean) => {
+    const response = await api.post(`/bookings/${id}/approve-revision`, { approved });
+    return response.data;
+  },
 };
 
 export const servicesApi = {
+  getAll: async (params?: any) => {
+    const response = await api.get("/services/public", { params });
+    return response.data;
+  },
   getById: async (id: string) => {
     const response = await api.get(`/services/${id}`);
     return response.data;

@@ -65,6 +65,7 @@ model Service {
   title       String
   description String?
   price       Decimal       @db.Decimal(10, 2)
+  images      String[]      @default([])
   is_active   Boolean       @default(true)
   created_at  DateTime      @default(now())
   updated_at  DateTime      @updatedAt
@@ -87,6 +88,10 @@ model Booking {
   problem_description String
   scheduled_date      DateTime
   total_price         Decimal            @db.Decimal(10, 2)
+  start_otp           String?
+  final_price         Decimal?           @db.Decimal(10, 2)
+  is_price_revised    Boolean            @default(false)
+  revision_reason     String?
   status_logs         BookingStatusLog[]
   client              User               @relation("ClientBookings", fields: [client_id], references: [id])
   service             Service            @relation(fields: [service_id], references: [id])
@@ -180,6 +185,8 @@ enum BookingStatus {
   PENDING
   ACCEPTED
   REJECTED
+  IN_PROGRESS
+  WAITING_APPROVAL
   COMPLETED
   CANCELLED
 }

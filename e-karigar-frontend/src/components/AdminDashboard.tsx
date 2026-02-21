@@ -7,6 +7,7 @@ interface Service {
   title: string;
   description: string;
   price: number;
+  images: string[];
   is_active: boolean;
 }
 
@@ -380,7 +381,17 @@ const AdminDashboard = () => {
                                       <span className="w-2 h-2 rounded-full bg-slate-300" title="Inactive"></span>
                                     )}
                                   </div>
+                                  {service.images && service.images.length > 0 && (
+                                    <div className="mt-2 text-xs text-blue-600 underline">
+                                      <a href={service.images[0]} target="_blank" rel="noopener noreferrer">View Image</a>
+                                    </div>
+                                  )}
                                 </div>
+                                {service.images && service.images.length > 0 && (
+                                  <div className="h-16 w-16 rounded-lg bg-slate-100 overflow-hidden shrink-0 ml-3 border border-slate-200">
+                                    <img src={service.images[0]} alt={service.title} className="h-full w-full object-cover" />
+                                  </div>
+                                )}
                                 <button
                                   onClick={() => handleDeleteService(service.id, vendor.id)}
                                   className="text-slate-300 hover:text-red-500 p-1.5 hover:bg-red-50 rounded-lg transition-colors"

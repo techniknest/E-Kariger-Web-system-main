@@ -28,7 +28,18 @@ const LoginPage = () => {
       localStorage.setItem("role", response.data.user.role);
 
       const redirect = searchParams.get("redirect");
-      navigate(redirect || "/dashboard");
+      if (redirect) {
+        navigate(redirect);
+      } else {
+        const user = response.data.user;
+        if (user.role === "ADMIN") {
+          navigate("/admin"); // Assuming admin route exists or will be /dashboard which handles admin
+        } else if (user.vendorStatus === "APPROVED" || user.vendorStatus === "PENDING" || user.vendorStatus === "REJECTED") {
+          navigate("/vendor/dashboard");
+        } else {
+          navigate("/client/dashboard");
+        }
+      }
     } catch (err: any) {
       const message = err.response?.data?.message || "Login failed. Please check your credentials.";
       setError(message);

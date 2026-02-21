@@ -60,6 +60,7 @@ export class ServicesService {
         title: data.title,
         description: data.description,
         price: data.price, // Ensure frontend sends this as a number or string
+        images: data.images || [], // Handle images array
         vendor_id: vendor.id,
         category_id: category.id,
         is_active: true,
@@ -95,6 +96,7 @@ export class ServicesService {
         title: data.title ?? service.title,
         description: data.description ?? service.description,
         price: data.price ?? service.price,
+        images: data.images ?? service.images,
         is_active: data.is_active ?? service.is_active,
       }
     });
