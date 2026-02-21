@@ -2,16 +2,15 @@ import { Module } from '@nestjs/common';
 import { ServicesController } from './services.controller';
 import { ServicesService } from './services.service';
 import { PrismaService } from '../prisma.service';
-import { JwtModule } from '@nestjs/jwt'; // Required for AuthGuard
+import { AuthModule } from '../auth/auth.module';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
   imports: [
-    JwtModule.register({
-      secret: process.env.JWT_SECRET, // MUST match AuthModule secret
-      signOptions: { expiresIn: '1h' },
-    }),
+    AuthModule,
+    CloudinaryModule,
   ],
   controllers: [ServicesController],
   providers: [ServicesService, PrismaService],
 })
-export class ServicesModule {}
+export class ServicesModule { }

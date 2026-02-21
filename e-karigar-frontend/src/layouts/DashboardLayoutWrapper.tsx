@@ -7,6 +7,7 @@ const DashboardLayoutWrapper = () => {
     const user = userString ? JSON.parse(userString) : null;
 
     if (!user) {
+        localStorage.removeItem("token"); // Prevent infinite loop
         return <Navigate to="/login" replace />;
     }
 

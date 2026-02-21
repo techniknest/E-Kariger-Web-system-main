@@ -2,6 +2,9 @@ import { Controller, Get, Post, Body, Patch, Param, UseGuards, Request } from '@
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
+import { StartJobDto } from './dto/start-job.dto';
+import { ReviseQuoteDto } from './dto/revise-quote.dto';
+import { ApproveRevisionDto } from './dto/approve-revision.dto';
 import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('bookings')
@@ -30,5 +33,29 @@ export class BookingsController {
     @Patch(':id/status')
     updateStatus(@Request() req, @Param('id') id: string, @Body() updateBookingStatusDto: UpdateBookingStatusDto) {
         return this.bookingsService.updateStatus(id, updateBookingStatusDto, req.user.sub);
+    }
+
+    // ─── Feature A: Start Job (OTP Handshake) ───────────────────────────
+
+    @UseGuards(AuthGuard)
+    @Post(':id/start')
+    startJob(@Request() req, @Param('id') id: string, @Body() startJobDto: StartJobDto) {
+        return this.bookingsService.startJob(id, startJobDto, req.user.sub);
+    }
+
+    // ─── Feature B: Revise Quote ────────────────────────────────────────
+
+    @UseGuards(AuthGuard)
+    @Patch(':id/revise')
+    reviseQuote(@Request() req, @Param('id') id: string, @Body() reviseQuoteDto: ReviseQuoteDto) {
+        return this.bookingsService.reviseQuote(id, reviseQuoteDto, req.user.sub);
+    }
+
+    // ─── Feature C: Approve / Reject Revised Quote ──────────────────────
+
+    @UseGuards(AuthGuard)
+    @Post(':id/approve-revision')
+    approveRevision(@Request() req, @Param('id') id: string, @Body() approveRevisionDto: ApproveRevisionDto) {
+        return this.bookingsService.approveRevision(id, approveRevisionDto, req.user.sub);
     }
 }
