@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Briefcase,
   Calendar,
@@ -9,7 +10,6 @@ import {
   Home,
   Loader2,
   MapPin,
-  Star,
   ArrowRight,
   Play,
   AlertTriangle,
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import AdminDashboard from "../components/AdminDashboard";
 import VendorDashboard from "../components/VendorDashboard";
+import ReviewModal from "../components/ReviewModal";
 import { bookingsApi } from "../services/api";
 
 // ─── Booking Interface ──────────────────────────────────────────
@@ -33,6 +34,7 @@ interface Booking {
   final_price?: number;
   is_price_revised?: boolean;
   revision_reason?: string;
+  review?: { id: string; rating: number; comment?: string } | null;
 }
 
 // ─── Status Badge Component ────────────────────────────────────
@@ -56,11 +58,12 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 // ─── Booking Card Component ────────────────────────────────────
-const BookingCard = ({ booking, onApprove, onReject, actionLoading }: {
+const BookingCard = ({ booking, onApprove, onReject, actionLoading, onRate }: {
   booking: Booking;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
-  actionLoading: string | null;
+  actionLoading: boolean;
+  onRate?: (booking: Booking) => void;
 }) => {
   const displayPrice = booking.is_price_revised ? booking.final_price : booking.total_price;
 
@@ -133,14 +136,14 @@ const BookingCard = ({ booking, onApprove, onReject, actionLoading }: {
           <div className="flex gap-2">
             <button
               onClick={() => onApprove?.(booking.id)}
-              disabled={actionLoading === booking.id}
+              disabled={actionLoading}
               className="px-3 py-1.5 bg-green-600 text-white rounded-md text-xs font-semibold hover:bg-green-700 transition-colors disabled:opacity-50"
             >
               Approve
             </button>
             <button
               onClick={() => onReject?.(booking.id)}
-              disabled={actionLoading === booking.id}
+              disabled={actionLoading}
               className="px-3 py-1.5 bg-white text-red-600 border border-red-200 rounded-md text-xs font-semibold hover:bg-red-50 transition-colors disabled:opacity-50"
             >
               Reject & Cancel
@@ -150,9 +153,19 @@ const BookingCard = ({ booking, onApprove, onReject, actionLoading }: {
       )}
 
       {booking.status === 'COMPLETED' && (
-        <button className="text-blue-700 text-sm font-medium hover:underline text-left">
-          Rate Service
-        </button>
+        booking.review ? (
+          <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium">
+            <CheckCircle className="h-4 w-4" />
+            Reviewed — {booking.review.rating}/5 stars
+          </div>
+        ) : (
+          <button
+            onClick={() => onRate?.(booking)}
+            className="text-blue-700 text-sm font-medium hover:underline text-left flex items-center gap-1"
+          >
+            ⭐ Rate Service
+          </button>
+        )
       )}
     </div>
   );
@@ -161,10 +174,9 @@ const BookingCard = ({ booking, onApprove, onReject, actionLoading }: {
 // ─── Main Dashboard Page ────────────────────────────────────────
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loadingBookings, setLoadingBookings] = useState(false);
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"active" | "past">("active");
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
 
   const userString = localStorage.getItem("user");
   const user = userString ? JSON.parse(userString) : null;
@@ -184,19 +196,14 @@ const DashboardPage = () => {
   const isRejectedVendor = user.vendorStatus === "REJECTED";
   const isClient = user.role === "CLIENT" && user.vendorStatus === "NONE";
 
-  const fetchClientBookings = () => {
-    setLoadingBookings(true);
-    bookingsApi.getClientBookings()
-      .then((data) => setBookings(data))
-      .catch(console.error)
-      .finally(() => setLoadingBookings(false));
-  };
-
-  useEffect(() => {
-    if (isClient || isPendingVendor || isRejectedVendor) {
-      fetchClientBookings();
-    }
-  }, [isClient, isPendingVendor, isRejectedVendor]);
+  // React Query: fetch client bookings with 5s polling
+  const { data: bookings = [], isLoading: loadingBookings } = useQuery<Booking[]>({
+    queryKey: ['clientBookings'],
+    queryFn: () => bookingsApi.getClientBookings(),
+    enabled: isClient || isPendingVendor || isRejectedVendor,
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true,
+  });
 
   // Enforce Canonical URLs
   const location = useLocation();
@@ -210,24 +217,25 @@ const DashboardPage = () => {
     }
   }, [isAdmin, isApprovedVendor, isClient, isPendingVendor, isRejectedVendor, location.pathname, navigate]);
 
-  // Handlers
-  const handleApprove = async (id: string) => {
-    setActionLoading(id);
-    try {
-      await bookingsApi.approveRevision(id, true);
-      fetchClientBookings();
-    } catch { alert("Failed to approve"); }
-    finally { setActionLoading(null); }
-  };
+  // Mutations for price revision approvals
+  const approveRevisionMutation = useMutation({
+    mutationFn: (id: string) => bookingsApi.approveRevision(id, true),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clientBookings'] });
+    },
+    onError: () => { alert("Failed to approve"); },
+  });
 
-  const handleReject = async (id: string) => {
-    setActionLoading(id);
-    try {
-      await bookingsApi.approveRevision(id, false);
-      fetchClientBookings();
-    } catch { alert("Failed to reject"); }
-    finally { setActionLoading(null); }
-  };
+  const rejectRevisionMutation = useMutation({
+    mutationFn: (id: string) => bookingsApi.approveRevision(id, false),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clientBookings'] });
+    },
+    onError: () => { alert("Failed to reject"); },
+  });
+
+  const handleApprove = (id: string) => approveRevisionMutation.mutate(id);
+  const handleReject = (id: string) => rejectRevisionMutation.mutate(id);
 
   // Filter bookings by tab
   const activeStatuses = ['PENDING', 'ACCEPTED', 'IN_PROGRESS', 'WAITING_APPROVAL'];
@@ -242,137 +250,149 @@ const DashboardPage = () => {
 
   // ─── Client View ──────────────────────────────────────────────
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">My Dashboard</h1>
-          <p className="text-slate-500 text-sm mt-0.5">Welcome back, <span className="font-medium">{user.name}</span>.</p>
-        </div>
-        <button
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2 px-4 py-2 text-blue-700 font-medium text-sm border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
-        >
-          <Home className="h-4 w-4" />
-          Browse Services
-        </button>
-      </div>
-
-      {/* Status Banners */}
-      {isPendingVendor && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-5 flex items-start gap-3">
-          <Clock className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
+    <>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-start justify-between">
           <div>
-            <h3 className="font-bold text-yellow-800 text-sm">Seller Application Under Review</h3>
-            <p className="text-yellow-700 text-xs mt-0.5">Our team is reviewing your application. This usually takes 24-48 hours.</p>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">My Dashboard</h1>
+            <p className="text-slate-500 text-sm mt-0.5">Welcome back, <span className="font-medium">{user.name}</span>.</p>
           </div>
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 px-4 py-2 text-blue-700 font-medium text-sm border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+          >
+            <Home className="h-4 w-4" />
+            Browse Services
+          </button>
         </div>
-      )}
 
-      {isRejectedVendor && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-5 flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
-          <div>
-            <h3 className="font-bold text-red-800 text-sm">Application Not Approved</h3>
-            <p className="text-red-700 text-xs mt-0.5">Your seller application was not approved. Please contact support.</p>
-          </div>
-        </div>
-      )}
-
-      {/* Become a Vendor CTA */}
-      {isClient && (
-        <div className="bg-gradient-to-r from-blue-700 to-slate-900 rounded-2xl p-6 text-white overflow-hidden relative">
-          {/* Background decoration */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-white/5"></div>
-            <div className="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-white/5"></div>
-            <Briefcase className="absolute right-8 top-1/2 -translate-y-1/2 h-24 w-24 text-white/[0.06]" />
-          </div>
-
-          <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        {/* Status Banners */}
+        {isPendingVendor && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-5 flex items-start gap-3">
+            <Clock className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-lg font-bold mb-1">Are you a Skilled Professional?</h3>
-              <p className="text-blue-200 text-sm max-w-md">
-                Join E-Karigar and grow your income. List your services, find local clients,
-                and start earning. It takes just 2 minutes.
-              </p>
+              <h3 className="font-bold text-yellow-800 text-sm">Seller Application Under Review</h3>
+              <p className="text-yellow-700 text-xs mt-0.5">Our team is reviewing your application. This usually takes 24-48 hours.</p>
             </div>
-            <button
-              onClick={() => navigate("/become-vendor")}
-              className="bg-white text-blue-700 px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-blue-50 transition shadow-lg whitespace-nowrap flex items-center gap-2"
-            >
-              Become a Vendor
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Bookings Section */}
-      <div>
-        {/* Tabs */}
-        <div className="flex items-center gap-6 border-b border-gray-200 mb-5">
-          <button
-            onClick={() => setActiveTab("active")}
-            className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === "active"
-                ? "text-blue-700"
-                : "text-slate-500 hover:text-slate-700"
-              }`}
-          >
-            Active Bookings
-            {activeTab === "active" && (
-              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-700 rounded-full" />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("past")}
-            className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === "past"
-                ? "text-blue-700"
-                : "text-slate-500 hover:text-slate-700"
-              }`}
-          >
-            Past Jobs
-            {activeTab === "past" && (
-              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-700 rounded-full" />
-            )}
-          </button>
-        </div>
-
-        {/* Content */}
-        {loadingBookings ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-6 w-6 text-blue-700 animate-spin" />
-          </div>
-        ) : filteredBookings.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-            <Calendar className="h-10 w-10 mx-auto text-slate-300 mb-3" />
-            <p className="text-sm text-slate-500 font-medium">
-              {activeTab === "active" ? "No active bookings" : "No past jobs"}
-            </p>
-            {activeTab === "active" && (
-              <button
-                onClick={() => navigate("/")}
-                className="mt-3 px-5 py-2 bg-blue-700 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition"
-              >
-                Browse Services
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredBookings.map((booking) => (
-              <BookingCard
-                key={booking.id}
-                booking={booking}
-                onApprove={handleApprove}
-                onReject={handleReject}
-                actionLoading={actionLoading}
-              />
-            ))}
           </div>
         )}
+
+        {isRejectedVendor && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-5 flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-bold text-red-800 text-sm">Application Not Approved</h3>
+              <p className="text-red-700 text-xs mt-0.5">Your seller application was not approved. Please contact support.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Become a Vendor CTA */}
+        {isClient && (
+          <div className="bg-gradient-to-r from-blue-700 to-slate-900 rounded-2xl p-6 text-white overflow-hidden relative">
+            {/* Background decoration */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-white/5"></div>
+              <div className="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-white/5"></div>
+              <Briefcase className="absolute right-8 top-1/2 -translate-y-1/2 h-24 w-24 text-white/[0.06]" />
+            </div>
+
+            <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold mb-1">Are you a Skilled Professional?</h3>
+                <p className="text-blue-200 text-sm max-w-md">
+                  Join E-Karigar and grow your income. List your services, find local clients,
+                  and start earning. It takes just 2 minutes.
+                </p>
+              </div>
+              <button
+                onClick={() => navigate("/become-vendor")}
+                className="bg-white text-blue-700 px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-blue-50 transition shadow-lg whitespace-nowrap flex items-center gap-2"
+              >
+                Become a Vendor
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Bookings Section */}
+        <div>
+          {/* Tabs */}
+          <div className="flex items-center gap-6 border-b border-gray-200 mb-5">
+            <button
+              onClick={() => setActiveTab("active")}
+              className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === "active"
+                ? "text-blue-700"
+                : "text-slate-500 hover:text-slate-700"
+                }`}
+            >
+              Active Bookings
+              {activeTab === "active" && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-700 rounded-full" />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("past")}
+              className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === "past"
+                ? "text-blue-700"
+                : "text-slate-500 hover:text-slate-700"
+                }`}
+            >
+              Past Jobs
+              {activeTab === "past" && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-700 rounded-full" />
+              )}
+            </button>
+          </div>
+
+          {/* Content */}
+          {loadingBookings ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="h-6 w-6 text-blue-700 animate-spin" />
+            </div>
+          ) : filteredBookings.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
+              <Calendar className="h-10 w-10 mx-auto text-slate-300 mb-3" />
+              <p className="text-sm text-slate-500 font-medium">
+                {activeTab === "active" ? "No active bookings" : "No past jobs"}
+              </p>
+              {activeTab === "active" && (
+                <button
+                  onClick={() => navigate("/")}
+                  className="mt-3 px-5 py-2 bg-blue-700 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition"
+                >
+                  Browse Services
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredBookings.map((booking) => (
+                <BookingCard
+                  key={booking.id}
+                  booking={booking}
+                  onApprove={handleApprove}
+                  onReject={handleReject}
+                  actionLoading={approveRevisionMutation.isPending || rejectRevisionMutation.isPending}
+                  onRate={(b) => setReviewBooking(b)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {reviewBooking && (
+        <ReviewModal
+          bookingId={reviewBooking.id}
+          serviceName={reviewBooking.service.title}
+          vendorName={reviewBooking.vendor?.user?.name || 'Vendor'}
+          onClose={() => setReviewBooking(null)}
+        />
+      )}
+    </>
   );
 };
 

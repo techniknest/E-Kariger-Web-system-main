@@ -27,14 +27,31 @@ export class ServicesService {
       include: {
         vendor: {
           include: {
-            user: { select: { name: true, email: true } }
+            user: { select: { name: true, email: true } },
+            reviews_received: {
+              include: {
+                client: { select: { name: true } },
+              },
+              orderBy: { created_at: 'desc' },
+            },
           }
         },
         category: true,
       },
     });
     if (!service) throw new NotFoundException('Service not found');
-    return service;
+
+    // Compute aggregate rating for this vendor
+    const reviews = service.vendor.reviews_received;
+    const totalReviews = reviews.length;
+    const averageRating = totalReviews > 0
+      ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10) / 10
+      : 0;
+
+    return {
+      ...service,
+      vendorRating: { averageRating, totalReviews },
+    };
   }
 
 

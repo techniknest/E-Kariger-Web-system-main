@@ -45,10 +45,10 @@ const DashboardLayout = ({ children, user }: DashboardLayoutProps) => {
     ];
 
     const vendorLinks = [
-        { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-        { name: "Job Requests", icon: Briefcase, path: "/dashboard/jobs" },
-        { name: "My Profile", icon: UserCircle, path: "/dashboard/profile" },
-        { name: "Settings", icon: Settings, path: "/dashboard/settings" },
+        { name: "Dashboard", icon: LayoutDashboard, path: "/vendor/dashboard" },
+        { name: "Job Requests", icon: Briefcase, path: "/vendor/jobs" },
+        { name: "My Profile", icon: UserCircle, path: "/vendor/profile" },
+        { name: "Settings", icon: Settings, path: "/vendor/settings" },
         { name: "Return to Home", icon: Home, path: "/" },
     ];
 

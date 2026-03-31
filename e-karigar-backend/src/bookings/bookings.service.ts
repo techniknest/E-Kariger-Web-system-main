@@ -61,7 +61,8 @@ export class BookingsService {
                 service: true,
                 vendor: {
                     include: { user: { select: { name: true, email: true, phone: true } } }
-                }
+                },
+                review: true,
             },
             orderBy: { created_at: 'desc' },
         });

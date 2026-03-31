@@ -52,17 +52,34 @@ export class AdminService {
     });
   }
 
-  // 4. Get All Approved Vendors
+  // 4. Get All Approved Vendors (with ratings)
   async getApprovedVendors() {
-    return this.prisma.vendorProfile.findMany({
+    const vendors = await this.prisma.vendorProfile.findMany({
       where: { approval_status: VendorVerificationStatus.APPROVED },
       include: {
         user: {
           select: { name: true, email: true, phone: true },
         },
         services: true,
+        reviews_received: {
+          select: { rating: true },
+        },
       },
       orderBy: { created_at: 'desc' },
+    });
+
+    return vendors.map(vendor => {
+      const reviews = vendor.reviews_received;
+      const totalReviews = reviews.length;
+      const averageRating = totalReviews > 0
+        ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10) / 10
+        : 0;
+
+      return {
+        ...vendor,
+        averageRating,
+        totalReviews,
+      };
     });
   }
 

@@ -10,6 +10,7 @@ import AboutPage from "./pages/AboutPage";
 import DashboardLayoutWrapper from "./layouts/DashboardLayoutWrapper";
 import VendorVerificationList from "./components/admin/VendorVerificationList";
 import JobRequestManager from "./components/vendor/JobRequestManager";
+import PlaceholderPage from "./pages/PlaceholderPage";
 
 // Security Wrapper: Checks if token exists before showing protected pages
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
@@ -74,6 +75,8 @@ function App() {
         <Route path="/client" element={<DashboardLayoutWrapper />}>
           <Route index element={<Navigate to="/client/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="bookings" element={<PlaceholderPage />} />
+          <Route path="settings" element={<PlaceholderPage />} />
         </Route>
 
         {/* Vendor Dashboard */}
@@ -81,6 +84,8 @@ function App() {
           <Route index element={<Navigate to="/vendor/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="jobs" element={<JobRequestManager />} />
+          <Route path="profile" element={<PlaceholderPage />} />
+          <Route path="settings" element={<PlaceholderPage />} />
           <Route path="verification" element={<VendorVerificationList />} />
         </Route>
 

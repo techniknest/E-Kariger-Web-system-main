@@ -2,13 +2,9 @@ import { useEffect, useState } from "react";
 import {
     Check,
     X,
-    Search,
-    Filter,
-    MoreVertical,
     Eye,
     Loader2,
     MapPin,
-    Phone,
     Calendar,
     FileText,
     Shield,
@@ -83,7 +79,7 @@ const VendorDetailsModal = ({
 
                     {/* Header Profile */}
                     <div className="flex items-start gap-4">
-                        <div className="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-2xl">
+                        <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-2xl">
                             {vendor.user.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -253,7 +249,7 @@ const VendorVerificationList = () => {
                             className={`
                 px-4 py-2 rounded-lg text-sm font-medium transition-all capitalize
                 ${activeTab === tab
-                                    ? 'bg-indigo-600 text-white shadow-md'
+                                    ? 'bg-blue-700 text-white shadow-md'
                                     : 'text-slate-600 hover:bg-slate-50'}
               `}
                         >
@@ -267,7 +263,7 @@ const VendorVerificationList = () => {
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden min-h-[400px]">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center p-20">
-                        <Loader2 className="h-10 w-10 text-indigo-600 animate-spin mb-4" />
+                        <Loader2 className="h-10 w-10 text-blue-700 animate-spin mb-4" />
                         <p className="text-slate-500">Loading vendors...</p>
                     </div>
                 ) : vendors.length === 0 ? (
@@ -297,7 +293,7 @@ const VendorVerificationList = () => {
                                     <tr key={vendor.id} className="hover:bg-slate-50/50 transition-colors group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 text-white flex items-center justify-center font-bold text-sm shadow-sm">
                                                     {vendor.user.name.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
@@ -320,7 +316,7 @@ const VendorVerificationList = () => {
                                         <td className="px-6 py-4 text-right">
                                             <button
                                                 onClick={() => setSelectedVendor(vendor)}
-                                                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
+                                                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-blue-700 hover:border-blue-200 transition-all shadow-sm"
                                             >
                                                 <Eye className="h-3.5 w-3.5" />
                                                 View Details

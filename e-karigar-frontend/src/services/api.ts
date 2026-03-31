@@ -78,3 +78,18 @@ export const servicesApi = {
     return response.data;
   }
 };
+
+export const reviewsApi = {
+  create: async (data: { bookingId: string; rating: number; comment?: string }) => {
+    const response = await api.post("/reviews", data);
+    return response.data;
+  },
+  getVendorReviews: async (vendorId: string) => {
+    const response = await api.get(`/reviews/vendor/${vendorId}`);
+    return response.data;
+  },
+  getMyRating: async () => {
+    const response = await api.get("/reviews/my-rating");
+    return response.data;
+  },
+};

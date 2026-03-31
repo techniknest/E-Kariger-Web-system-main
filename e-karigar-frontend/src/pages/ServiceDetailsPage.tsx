@@ -22,9 +22,20 @@ interface Service {
         };
         verification_badge: boolean;
         business_phone?: string;
+        reviews_received?: {
+            id: string;
+            rating: number;
+            comment?: string;
+            created_at: string;
+            client: { name: string };
+        }[];
     };
     category?: {
         name: string;
+    };
+    vendorRating?: {
+        averageRating: number;
+        totalReviews: number;
     };
 }
 
@@ -40,8 +51,10 @@ const ServiceDetailsPage = () => {
     const [time, setTime] = useState("");
     const [address, setAddress] = useState("");
 
-    const userRole = localStorage.getItem("role");
     const token = localStorage.getItem("token");
+    const userString = localStorage.getItem("user");
+    const user = userString ? JSON.parse(userString) : null;
+    const userRole = user?.role || null;
     const canBook = !token || (userRole === "CLIENT");
 
     useEffect(() => {
@@ -135,7 +148,10 @@ const ServiceDetailsPage = () => {
                             </h1>
                             <div className="flex items-center gap-4 text-sm text-slate-500">
                                 <span className="flex items-center gap-1 font-medium text-slate-700">
-                                    <Star className="h-4 w-4 text-amber-500 fill-current" /> 4.8
+                                    <Star className="h-4 w-4 text-amber-500 fill-current" /> {service.vendorRating?.averageRating || 'N/A'}
+                                    {service.vendorRating && service.vendorRating.totalReviews > 0 && (
+                                        <span className="text-slate-400 font-normal">({service.vendorRating.totalReviews})</span>
+                                    )}
                                 </span>
                                 <span>•</span>
                                 <span className="flex items-center gap-1">
@@ -179,29 +195,38 @@ const ServiceDetailsPage = () => {
                             </div>
                         </div>
 
-                        {/* Reviews Preview (Static for now) */}
+                        {/* Reviews */}
                         <div>
-                            <h3 className="text-lg font-bold text-slate-900 mb-3">Reviews</h3>
-                            <div className="space-y-4">
-                                {[1, 2].map((i) => (
-                                    <div key={i} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
-                                                U{i}
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-slate-900">User {i}</p>
-                                                <div className="flex text-amber-500">
-                                                    {[...Array(5)].map((_, idx) => (
-                                                        <Star key={idx} className="h-3 w-3 fill-current" />
-                                                    ))}
+                            <h3 className="text-lg font-bold text-slate-900 mb-3">
+                                Reviews {service.vendorRating && service.vendorRating.totalReviews > 0 && `(${service.vendorRating.totalReviews})`}
+                            </h3>
+                            {service.vendor.reviews_received && service.vendor.reviews_received.length > 0 ? (
+                                <div className="space-y-4">
+                                    {service.vendor.reviews_received.map((review) => (
+                                        <div key={review.id} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 uppercase">
+                                                    {review.client.name.charAt(0)}
                                                 </div>
+                                                <div>
+                                                    <p className="text-sm font-medium text-slate-900">{review.client.name}</p>
+                                                    <div className="flex text-amber-500">
+                                                        {[...Array(5)].map((_, idx) => (
+                                                            <Star key={idx} className={`h-3 w-3 ${idx < review.rating ? 'fill-current' : 'text-slate-200'}`} />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <span className="ml-auto text-xs text-slate-400">
+                                                    {new Date(review.created_at).toLocaleDateString()}
+                                                </span>
                                             </div>
+                                            {review.comment && <p className="text-sm text-slate-600">{review.comment}</p>}
                                         </div>
-                                        <p className="text-sm text-slate-600">Great service, very professional and punctual.</p>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-slate-400">No reviews yet for this vendor.</p>
+                            )}
                         </div>
                     </div>
 
