@@ -51,15 +51,8 @@ const HomePage = () => {
 
             {/* 1. Hero Section: "The Trust Builder" */}
             <section className="relative h-[calc(100vh-6.5rem)] flex flex-col overflow-hidden">
-                {/* Background Image with Overlay */}
-                <div className="absolute inset-0">
-                    <img
-                        src="https://images.unsplash.com/photo-1581578731117-104f2a8d4618?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
-                        alt="Professional Worker"
-                        className="w-full h-full object-cover object-center"
-                    />
-                    <div className="absolute inset-0 bg-slate-900/80"></div>
-                </div>
+                {/* Background Overlay Only */}
+                <div className="absolute inset-0 bg-slate-900/80"></div>
 
                 {/* Main Content */}
                 <div className="relative z-10 flex-grow flex flex-col items-center justify-center max-w-7xl mx-auto px-6 text-center w-full">

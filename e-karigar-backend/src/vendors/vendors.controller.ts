@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Request, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Request, UseGuards } from '@nestjs/common';
 import { VendorsService } from './vendors.service';
 import { AuthGuard } from '../auth/auth.guard';
 
@@ -38,5 +38,15 @@ export class VendorsController {
     @Get('profile')
     async getVendorProfile(@Request() req) {
         return this.vendorsService.getVendorProfile(req.user.sub);
+    }
+
+    // Update vendor profile details
+    @UseGuards(AuthGuard)
+    @Patch('profile')
+    async updateVendorProfile(
+        @Request() req,
+        @Body() body: Partial<VendorApplicationDto>,
+    ) {
+        return this.vendorsService.updateVendorProfile(req.user.sub, body);
     }
 }

@@ -27,6 +27,17 @@ api.interceptors.request.use(
   }
 );
 
+export const authApi = {
+  getMe: async () => {
+    const response = await api.get("/auth/me");
+    return response.data;
+  },
+  updateProfile: async (data: { name?: string; phone?: string }) => {
+    const response = await api.patch("/auth/profile", data);
+    return response.data;
+  },
+};
+
 export default api;
 
 export interface CreateBookingPayload {
@@ -75,6 +86,21 @@ export const servicesApi = {
   },
   getById: async (id: string) => {
     const response = await api.get(`/services/${id}`);
+    return response.data;
+  }
+};
+
+export const vendorsApi = {
+  getProfile: async () => {
+    const response = await api.get("/vendors/profile");
+    return response.data;
+  },
+  updateProfile: async (data: any) => {
+    const response = await api.patch("/vendors/profile", data);
+    return response.data;
+  },
+  getStatus: async () => {
+    const response = await api.get("/vendors/status");
     return response.data;
   }
 };

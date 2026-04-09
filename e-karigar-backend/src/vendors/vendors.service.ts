@@ -50,6 +50,12 @@ export class VendorsService {
             },
         });
 
+        // 4. Update user role to VENDOR
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: { role: 'VENDOR' },
+        });
+
         return {
             message: 'Application submitted successfully! You will be notified once approved.',
             status: 'PENDING',
@@ -97,6 +103,33 @@ export class VendorsService {
             throw new NotFoundException('Vendor profile not found');
         }
 
-        return profile;
+    return profile;
+    }
+
+    // Update vendor profile details
+    async updateVendorProfile(userId: string, data: Partial<VendorApplicationDto>) {
+        const profile = await this.prisma.vendorProfile.findUnique({
+            where: { user_id: userId },
+        });
+
+        if (!profile) {
+            throw new NotFoundException('Vendor profile not found');
+        }
+
+        const updatedProfile = await this.prisma.vendorProfile.update({
+            where: { user_id: userId },
+            data: {
+                city: data.city,
+                business_phone: data.business_phone,
+                experience_years: data.experience_years,
+                description: data.description,
+                vendor_type: data.vendor_type,
+            },
+        });
+
+        return {
+            message: 'Vendor profile updated successfully',
+            profile: updatedProfile,
+        };
     }
 }

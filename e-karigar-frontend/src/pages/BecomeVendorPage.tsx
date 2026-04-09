@@ -96,7 +96,9 @@ const BecomeVendorPage = () => {
       if (userString) {
         const user = JSON.parse(userString);
         user.vendorStatus = "PENDING";
+        user.role = "VENDOR";
         localStorage.setItem("user", JSON.stringify(user));
+        window.dispatchEvent(new Event("auth-change"));
       }
 
       setStep(2);
@@ -122,63 +124,64 @@ const BecomeVendorPage = () => {
   // Show status if already applied
   if (existingStatus) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="max-w-2xl mx-auto px-4 py-16">
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 text-center">
-            {existingStatus === "PENDING" && (
-              <>
-                <div className="mx-auto h-20 w-20 bg-yellow-100 rounded-full flex items-center justify-center mb-6">
-                  <Clock className="h-10 w-10 text-yellow-600" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-3">Application Under Review</h2>
-                <p className="text-gray-600 mb-6">
-                  Your seller application has been submitted and is being reviewed by our team.
-                  You'll be notified once it's approved.
-                </p>
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-left">
-                  <p className="text-yellow-800 text-sm">
-                    <strong>What happens next?</strong><br />
-                    Our team will verify your details within 24-48 hours. Once approved,
-                    you'll be able to create service listings and start accepting bookings.
-                  </p>
-                </div>
-              </>
-            )}
+        <div className="min-h-screen bg-slate-50 font-['Inter',_sans-serif]">
+            <Navbar />
+            <div className="max-w-xl mx-auto px-4 py-16">
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden text-center">
+                    <div className="p-8">
+                        {existingStatus === "PENDING" && (
+                            <>
+                                <div className="mx-auto h-16 w-16 bg-amber-50 rounded-full flex items-center justify-center mb-5 border border-amber-100">
+                                    <Clock className="h-7 w-7 text-amber-600" />
+                                </div>
+                                <h2 className="text-xl font-bold text-slate-900 mb-2 tracking-tight">Application Under Review</h2>
+                                <p className="text-slate-500 text-sm mb-6 max-w-sm mx-auto">
+                                    Your professional application is currently being reviewed by our team.
+                                </p>
+                                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-left">
+                                    <h4 className="font-semibold text-slate-800 text-xs uppercase tracking-wide mb-1">What happens next?</h4>
+                                    <p className="text-slate-600 text-sm">
+                                        We will verify your details within 24 hours. Once approved,
+                                        you'll be able to create service listings and accept jobs.
+                                    </p>
+                                </div>
+                            </>
+                        )}
 
-            {existingStatus === "APPROVED" && (
-              <>
-                <div className="mx-auto h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
-                  <CheckCircle className="h-10 w-10 text-green-600" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-3">You're Already a Seller!</h2>
-                <p className="text-gray-600 mb-6">
-                  Your seller account is active. Visit your dashboard to manage services.
-                </p>
-              </>
-            )}
+                        {existingStatus === "APPROVED" && (
+                            <>
+                                <div className="mx-auto h-16 w-16 bg-green-50 rounded-full flex items-center justify-center mb-5 border border-green-100">
+                                    <CheckCircle className="h-7 w-7 text-green-600" />
+                                </div>
+                                <h2 className="text-xl font-bold text-slate-900 mb-2 tracking-tight">You're Approved!</h2>
+                                <p className="text-slate-500 text-sm mb-6 max-w-sm mx-auto">
+                                    Your professional account is active. Head to your dashboard to manage services.
+                                </p>
+                            </>
+                        )}
 
-            {existingStatus === "REJECTED" && (
-              <>
-                <div className="mx-auto h-20 w-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
-                  <AlertCircle className="h-10 w-10 text-red-600" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-3">Application Not Approved</h2>
-                <p className="text-gray-600 mb-6">
-                  Unfortunately, your application was not approved. Please contact support for more information.
-                </p>
-              </>
-            )}
+                        {existingStatus === "REJECTED" && (
+                            <>
+                                <div className="mx-auto h-16 w-16 bg-red-50 rounded-full flex items-center justify-center mb-5 border border-red-100">
+                                    <AlertCircle className="h-7 w-7 text-red-600" />
+                                </div>
+                                <h2 className="text-xl font-bold text-slate-900 mb-2 tracking-tight">Application Declined</h2>
+                                <p className="text-slate-500 text-sm mb-6 max-w-sm mx-auto">
+                                    Unfortunately, your application was not approved. Please contact support.
+                                </p>
+                            </>
+                        )}
 
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="mt-4 px-8 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition"
-            >
-              Go to Dashboard
-            </button>
-          </div>
+                        <button
+                            onClick={() => navigate("/dashboard")}
+                            className="mt-6 px-6 py-2.5 bg-blue-700 text-white text-sm font-bold rounded-lg hover:bg-blue-800 transition-all shadow-md shadow-blue-200"
+                        >
+                            Go to Dashboard
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     );
   }
 
@@ -374,29 +377,27 @@ const BecomeVendorPage = () => {
 
           {/* STEP 2: Success Message */}
           {step === 2 && (
-            <div className="text-center py-10">
-              <div className="mx-auto h-24 w-24 bg-green-100 rounded-full flex items-center justify-center mb-8 shadow-lg">
-                <CheckCircle className="h-12 w-12 text-green-600" />
+            <div className="text-center py-10 font-['Inter',_sans-serif]">
+              <div className="mx-auto h-16 w-16 bg-green-50 rounded-full flex items-center justify-center mb-5 border border-green-100">
+                <CheckCircle className="h-7 w-7 text-green-600" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-3">Application Received!</h2>
-              <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
-                Thank you for applying to become an E-Karigar seller. Our team will review your
-                profile within 24-48 hours. Once approved, you'll be notified and can start
-                adding services.
+              <h2 className="text-xl font-bold text-slate-900 mb-2 tracking-tight">Application Received!</h2>
+              <p className="text-slate-500 text-sm mb-8 max-w-sm mx-auto">
+                Thank you for applying. Our team will review your profile and notify you once approved.
               </p>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 max-w-md mx-auto text-left">
-                <h4 className="font-semibold text-blue-800 mb-2">What's Next?</h4>
-                <ul className="text-sm text-blue-700 space-y-1">
-                  <li>✓ Your dashboard will show "Pending" status</li>
-                  <li>✓ You'll receive notification on approval</li>
-                  <li>✓ Once approved, you can add your services</li>
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-5 mb-8 max-w-md mx-auto text-left">
+                <h4 className="font-semibold text-slate-800 text-xs uppercase tracking-wide mb-3">What happens next?</h4>
+                <ul className="text-sm text-slate-600 space-y-2">
+                  <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div> Your status will show as Pending</li>
+                  <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div> We will verify your credentials</li>
+                  <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-green-500"></div> You will be notified upon approval</li>
                 </ul>
               </div>
 
               <button
                 onClick={() => navigate("/dashboard")}
-                className="px-10 py-4 bg-gray-900 text-white font-bold rounded-lg hover:bg-gray-800 transition shadow-lg"
+                className="px-8 py-2.5 bg-blue-700 text-white text-sm font-bold rounded-lg hover:bg-blue-800 transition-all shadow-md shadow-blue-200"
               >
                 Return to Dashboard
               </button>

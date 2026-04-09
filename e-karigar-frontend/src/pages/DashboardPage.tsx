@@ -175,7 +175,6 @@ const BookingCard = ({ booking, onApprove, onReject, actionLoading, onRate }: {
 const DashboardPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"active" | "past">("active");
   const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
 
   const userString = localStorage.getItem("user");
@@ -237,12 +236,9 @@ const DashboardPage = () => {
   const handleApprove = (id: string) => approveRevisionMutation.mutate(id);
   const handleReject = (id: string) => rejectRevisionMutation.mutate(id);
 
-  // Filter bookings by tab
+  // Filter bookings to show only active jobs
   const activeStatuses = ['PENDING', 'ACCEPTED', 'IN_PROGRESS', 'WAITING_APPROVAL'];
-  const pastStatuses = ['COMPLETED', 'REJECTED', 'CANCELLED'];
-  const filteredBookings = bookings.filter(b =>
-    activeTab === "active" ? activeStatuses.includes(b.status) : pastStatuses.includes(b.status)
-  );
+  const filteredBookings = bookings.filter(b => activeStatuses.includes(b.status));
 
   // ─── Admin & Vendor Views (unchanged) ─────────────────────────
   if (isAdmin) return <AdminDashboard />;
@@ -319,33 +315,9 @@ const DashboardPage = () => {
 
         {/* Bookings Section */}
         <div>
-          {/* Tabs */}
-          <div className="flex items-center gap-6 border-b border-gray-200 mb-5">
-            <button
-              onClick={() => setActiveTab("active")}
-              className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === "active"
-                ? "text-blue-700"
-                : "text-slate-500 hover:text-slate-700"
-                }`}
-            >
-              Active Bookings
-              {activeTab === "active" && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-700 rounded-full" />
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab("past")}
-              className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === "past"
-                ? "text-blue-700"
-                : "text-slate-500 hover:text-slate-700"
-                }`}
-            >
-              Past Jobs
-              {activeTab === "past" && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-700 rounded-full" />
-              )}
-            </button>
-          </div>
+          <h2 className="text-lg font-bold text-slate-900 border-b border-gray-200 pb-3 mb-5">
+            Active Bookings
+          </h2>
 
           {/* Content */}
           {loadingBookings ? (
@@ -356,16 +328,14 @@ const DashboardPage = () => {
             <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
               <Calendar className="h-10 w-10 mx-auto text-slate-300 mb-3" />
               <p className="text-sm text-slate-500 font-medium">
-                {activeTab === "active" ? "No active bookings" : "No past jobs"}
+                No active bookings
               </p>
-              {activeTab === "active" && (
-                <button
-                  onClick={() => navigate("/")}
-                  className="mt-3 px-5 py-2 bg-blue-700 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition"
-                >
-                  Browse Services
-                </button>
-              )}
+              <button
+                onClick={() => navigate("/")}
+                className="mt-3 px-5 py-2 bg-blue-700 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition"
+              >
+                Browse Services
+              </button>
             </div>
           ) : (
             <div className="space-y-3">

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Search, MapPin, Globe, ChevronDown, Menu, Hammer, LogOut, UserCircle, Gauge } from "lucide-react";
+import { Search, MapPin, Globe, ChevronDown, Menu, LogOut, UserCircle, Gauge } from "lucide-react";
 import { pakistanCities } from "../data/pakistanCities";
 
 interface NavbarProps {
@@ -31,11 +31,30 @@ const Navbar = ({ simple = false }: NavbarProps) => {
         }
     }, []);
 
-    // Check auth state on mount and update on event
-    const checkAuth = () => {
+    // Check auth state from local storage and optionally sync with backend
+    const checkAuth = async () => {
         const userStr = localStorage.getItem("user");
+        const tokenStr = localStorage.getItem("token");
+        
         if (userStr) {
             setUser(JSON.parse(userStr));
+            
+            // Background sync to ensure role/details are perfectly fresh without requiring logout
+            if (tokenStr) {
+                try {
+                    // Lazy import api to prevent circular deps or just use fetch
+                    const res = await fetch('http://localhost:5000/auth/me', {
+                        headers: { 'Authorization': `Bearer ${tokenStr}` }
+                    });
+                    if (res.ok) {
+                        const freshData = await res.json();
+                        localStorage.setItem("user", JSON.stringify(freshData));
+                        setUser(freshData);
+                    }
+                } catch (error) {
+                    console.error("Auth sync failed", error);
+                }
+            }
         } else {
             setUser(null);
         }
@@ -153,10 +172,9 @@ const Navbar = ({ simple = false }: NavbarProps) => {
 
                     {/* Section A: Brand */}
                     <Link to="/" className="flex items-center gap-2 group">
-                        <div className="bg-blue-50 p-1.5 rounded-lg border border-blue-100 group-hover:bg-blue-100 transition-colors">
-                            <Hammer className="h-6 w-6 text-blue-700" />
-                        </div>
-
+                        <span className="text-xl font-bold tracking-tight text-slate-800 group-hover:text-blue-700 transition-colors uppercase">
+                            E-Karigar
+                        </span>
                     </Link>
 
                     {/* Section B: Navigation Links (Center) - Hidden on Mobile & if simple is true */}
@@ -324,7 +342,7 @@ const Navbar = ({ simple = false }: NavbarProps) => {
                                                     Dashboard
                                                 </Link>
                                                 <Link
-                                                    to="/dashboard/profile"
+                                                    to="/profile"
                                                     className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
                                                     onClick={() => setIsProfileOpen(false)}
                                                 >

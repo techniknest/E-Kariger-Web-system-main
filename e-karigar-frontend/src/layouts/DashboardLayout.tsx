@@ -12,7 +12,8 @@ import {
     FileCheck,
     UserCircle,
     Home,
-    Calendar,
+    History,
+    TrendingUp,
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -46,15 +47,15 @@ const DashboardLayout = ({ children, user }: DashboardLayoutProps) => {
 
     const vendorLinks = [
         { name: "Dashboard", icon: LayoutDashboard, path: "/vendor/dashboard" },
-        { name: "Job Requests", icon: Briefcase, path: "/vendor/jobs" },
-        { name: "My Profile", icon: UserCircle, path: "/vendor/profile" },
-        { name: "Settings", icon: Settings, path: "/vendor/settings" },
+        { name: "My Jobs", icon: Briefcase, path: "/vendor/jobs" },
+        { name: "Earnings", icon: TrendingUp, path: "/vendor/earnings" },
+        { name: "My Profile", icon: UserCircle, path: "/profile" },
         { name: "Return to Home", icon: Home, path: "/" },
     ];
 
     const clientLinks = [
         { name: "Dashboard", icon: LayoutDashboard, path: "/client/dashboard" },
-        { name: "My Bookings", icon: Calendar, path: "/client/bookings" },
+        { name: "Booking History", icon: History, path: "/client/history" },
         { name: "Settings", icon: Settings, path: "/client/settings" },
         { name: "Return to Home", icon: Home, path: "/" },
     ];
