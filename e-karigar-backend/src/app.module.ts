@@ -8,6 +8,7 @@ import { VendorsModule } from './vendors/vendors.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -18,7 +19,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
     }),
-    AuthModule, AdminModule, ServicesModule, VendorsModule, BookingsModule, ReviewsModule, CloudinaryModule
+    AuthModule, AdminModule, ServicesModule, VendorsModule, BookingsModule, ReviewsModule, CloudinaryModule, NotificationsModule
   ],
   controllers: [AppController],
   providers: [AppService],

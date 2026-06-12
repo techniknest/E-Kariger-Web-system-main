@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 import { StartJobDto } from './dto/start-job.dto';
@@ -9,7 +10,7 @@ import { BookingStatus } from '@prisma/client';
 
 @Injectable()
 export class BookingsService {
-    constructor(private prisma: PrismaService) { }
+    constructor(private prisma: PrismaService, private notificationsService: NotificationsService) { }
 
     /**
      * Generate a random 4-digit OTP string (0000–9999).
@@ -39,7 +40,26 @@ export class BookingsService {
             throw new BadRequestException('You cannot book your own service');
         }
 
-        return this.prisma.booking.create({
+        const existingActiveBooking = await this.prisma.booking.findFirst({
+            where: {
+                client_id: userId,
+                service_id: serviceId,
+                status: {
+                    in: [
+                        BookingStatus.PENDING,
+                        BookingStatus.ACCEPTED,
+                        BookingStatus.IN_PROGRESS,
+                        BookingStatus.WAITING_APPROVAL,
+                    ],
+                },
+            },
+        });
+
+        if (existingActiveBooking) {
+            throw new BadRequestException('You already have an active booking for this service');
+        }
+
+        const booking = await this.prisma.booking.create({
             data: {
                 client_id: userId,
                 vendor_id: service.vendor.id,
@@ -52,6 +72,16 @@ export class BookingsService {
                 status: BookingStatus.PENDING,
             },
         });
+
+        await this.notificationsService.create(
+            service.vendor.user_id,
+            'NEW_BOOKING',
+            'New Booking Received',
+            'You have received a new booking from a client.',
+            '/vendor/jobs'
+        );
+
+        return booking;
     }
 
     async findAllByClient(clientId: string) {
@@ -102,10 +132,22 @@ export class BookingsService {
             }
         }
 
-        return this.prisma.booking.update({
+        const updatedBooking = await this.prisma.booking.update({
             where: { id },
             data: { status: updateDto.status }
         });
+
+        if (userId === booking.vendor.user_id) {
+            await this.notificationsService.create(
+                booking.client_id,
+                'BOOKING_STATUS_UPDATE',
+                'Booking Status Updated',
+                `Your booking status has been updated to ${updateDto.status}.`,
+                '/client/history'
+            );
+        }
+
+        return updatedBooking;
     }
 
     // ─── Feature A: Start Job (OTP Handshake) ───────────────────────────
@@ -131,10 +173,20 @@ export class BookingsService {
             throw new BadRequestException('Invalid OTP. Please ask the client for the correct code.');
         }
 
-        return this.prisma.booking.update({
+        const updatedBooking = await this.prisma.booking.update({
             where: { id },
             data: { status: BookingStatus.IN_PROGRESS },
         });
+
+        await this.notificationsService.create(
+            booking.client_id,
+            'JOB_STARTED',
+            'Job Started',
+            'Your vendor has started the job successfully.',
+            '/client/history'
+        );
+
+        return updatedBooking;
     }
 
     // ─── Feature B: Revise Quote ────────────────────────────────────────
@@ -155,7 +207,7 @@ export class BookingsService {
             throw new BadRequestException('Price can only be revised when the booking is ACCEPTED or IN_PROGRESS');
         }
 
-        return this.prisma.booking.update({
+        const updatedBooking = await this.prisma.booking.update({
             where: { id },
             data: {
                 final_price: dto.new_price,
@@ -164,6 +216,16 @@ export class BookingsService {
                 status: BookingStatus.WAITING_APPROVAL,
             },
         });
+
+        await this.notificationsService.create(
+            booking.client_id,
+            'QUOTE_REVISED',
+            'Price Revision Requested',
+            `The vendor has requested a price revision for your booking. Reason: ${dto.reason}`,
+            '/client/history'
+        );
+
+        return updatedBooking;
     }
 
     // ─── Feature C: Approve / Reject Revised Quote ──────────────────────
@@ -171,6 +233,7 @@ export class BookingsService {
     async approveRevision(id: string, dto: ApproveRevisionDto, userId: string) {
         const booking = await this.prisma.booking.findUnique({
             where: { id },
+            include: { vendor: true },
         });
 
         if (!booking) throw new NotFoundException('Booking not found');
@@ -185,15 +248,35 @@ export class BookingsService {
         }
 
         if (dto.approved) {
-            return this.prisma.booking.update({
+            const updatedBooking = await this.prisma.booking.update({
                 where: { id },
                 data: { status: BookingStatus.IN_PROGRESS },
             });
+
+            await this.notificationsService.create(
+                booking.vendor.user_id,
+                'REVISION_APPROVED',
+                'Price Revision Approved',
+                'The client has approved your price revision.',
+                '/vendor/jobs'
+            );
+
+            return updatedBooking;
         } else {
-            return this.prisma.booking.update({
+            const updatedBooking = await this.prisma.booking.update({
                 where: { id },
                 data: { status: BookingStatus.CANCELLED },
             });
+
+            await this.notificationsService.create(
+                booking.vendor.user_id,
+                'REVISION_REJECTED',
+                'Price Revision Rejected',
+                'The client has rejected your price revision and the booking is cancelled.',
+                '/vendor/jobs'
+            );
+
+            return updatedBooking;
         }
     }
 }

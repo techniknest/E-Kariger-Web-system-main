@@ -110,7 +110,7 @@ const BookingHistoryPage = () => {
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-gray-200 pb-5">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                        <Clock className="h-6 w-6 text-blue-700" />
+                        <Clock className="h-6 w-6 text-indigo-700" />
                         Booking History
                     </h1>
                     <p className="text-slate-500 text-sm mt-1">Review all your previous service bookings and engagements.</p>
@@ -120,7 +120,7 @@ const BookingHistoryPage = () => {
             {/* Content */}
             {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-20">
-                    <Loader2 className="h-8 w-8 text-blue-700 animate-spin mb-4" />
+                    <Loader2 className="h-8 w-8 text-indigo-700 animate-spin mb-4" />
                     <p className="text-sm font-medium text-slate-500">Loading your history...</p>
                 </div>
             ) : historyBookings.length === 0 ? (
@@ -132,7 +132,7 @@ const BookingHistoryPage = () => {
                     </p>
                     <button
                         onClick={() => navigate("/")}
-                        className="px-6 py-2.5 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition shadow-lg shadow-blue-200"
+                        className="px-6 py-2.5 bg-indigo-700 text-white rounded-xl text-sm font-bold hover:bg-indigo-800 transition shadow-lg shadow-indigo-200"
                     >
                         Browse Services
                     </button>

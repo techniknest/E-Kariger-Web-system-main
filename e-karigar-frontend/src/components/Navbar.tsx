@@ -166,14 +166,17 @@ const Navbar = ({ simple = false }: NavbarProps) => {
     };
 
     return (
-        <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm h-16">
+        <header className="sticky top-0 z-40 glass border-b border-slate-200/50 h-16 transition-all">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
                 <div className="flex justify-between items-center h-full">
 
                     {/* Section A: Brand */}
                     <Link to="/" className="flex items-center gap-2 group">
-                        <span className="text-xl font-bold tracking-tight text-slate-800 group-hover:text-blue-700 transition-colors uppercase">
-                            E-Karigar
+                        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200 group-hover:scale-105 transition-transform">
+                            <span className="text-white font-bold text-lg ">E</span>
+                        </div>
+                        <span className="text-xl font-bold tracking-tight text-slate-800 group-hover:text-indigo-600 transition-colors uppercase ">
+                            -Karigar
                         </span>
                     </Link>
 
@@ -185,9 +188,9 @@ const Navbar = ({ simple = false }: NavbarProps) => {
                                     key={link.name}
                                     to={link.path}
                                     className={({ isActive }) =>
-                                        `flex items-center gap-1 text-xs font-medium uppercase tracking-wide h-full border-b-2 transition-all duration-200 ${isActive
-                                            ? "border-blue-700 text-blue-700 pb-1"
-                                            : "border-transparent text-slate-600 hover:text-blue-700 hover:border-blue-300"
+                                        `flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest h-full border-b-2 transition-all duration-200 ${isActive
+                                            ? "border-indigo-600 text-indigo-700 pb-1"
+                                            : "border-transparent text-slate-500 hover:text-indigo-600 hover:border-indigo-200"
                                         }`
                                     }
                                 >
@@ -205,12 +208,12 @@ const Navbar = ({ simple = false }: NavbarProps) => {
                             {/* Search Input */}
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Search className="h-4 w-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
+                                    <Search className="h-4 w-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
                                 </div>
                                 <input
                                     type="text"
                                     placeholder="Search..."
-                                    className="pl-10 pr-4 py-2 w-48 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-600 outline-none transition-all placeholder:text-gray-400 text-slate-700 font-medium"
+                                    className="pl-9 pr-4 py-2 w-48 border border-slate-200 rounded-xl text-sm bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 text-slate-700 font-medium"
                                     onKeyDown={handleSearch}
                                 />
                             </div>
@@ -220,23 +223,25 @@ const Navbar = ({ simple = false }: NavbarProps) => {
                                 <div className="relative" ref={locationRef}>
                                     <button
                                         onClick={() => setIsLocationOpen(!isLocationOpen)}
-                                        className="flex items-center gap-1 hover:text-blue-700 cursor-pointer transition-colors"
+                                        className="flex items-center gap-1.5 hover:text-indigo-600 cursor-pointer transition-colors"
                                     >
-                                        <MapPin className="h-4 w-4" />
-                                        <span className="text-xs font-medium uppercase tracking-wide max-w-[100px] truncate" title={locationName}>{locationName}</span>
-                                        <ChevronDown className={`h-3 w-3 transition-transform ${isLocationOpen ? 'rotate-180' : ''}`} />
+                                        <div className="bg-slate-100 p-1.5 rounded-lg border border-slate-200">
+                                            <MapPin className="h-3.5 w-3.5" />
+                                        </div>
+                                        <span className="text-xs font-bold uppercase tracking-wide max-w-[100px] truncate" title={locationName}>{locationName}</span>
+                                        <ChevronDown className={`h-3 w-3 text-slate-400 transition-transform ${isLocationOpen ? 'rotate-180' : ''}`} />
                                     </button>
 
                                     {/* Location Dropdown */}
                                     {isLocationOpen && (
-                                        <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-100 p-2 animate-in fade-in slide-in-from-top-2 z-[60]">
+                                        <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 p-2 animate-in fade-in slide-in-from-top-2 z-[60]">
                                             {/* Current Location Button */}
                                             <button
                                                 onClick={() => {
                                                     detectLocation();
                                                     setIsLocationOpen(false);
                                                 }}
-                                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium mb-2"
+                                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors font-semibold mb-2 border border-transparent hover:border-indigo-100"
                                             >
                                                 <MapPin className="h-4 w-4" />
                                                 Use my current location
@@ -244,13 +249,13 @@ const Navbar = ({ simple = false }: NavbarProps) => {
 
                                             {/* Search Input */}
                                             <div className="relative mb-2">
-                                                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-gray-400" />
+                                                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                                                 <input
                                                     type="text"
                                                     placeholder="Search city..."
                                                     value={searchQuery}
                                                     onChange={handleLocationSearch}
-                                                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 bg-slate-50"
                                                     autoFocus
                                                 />
                                             </div>
@@ -294,7 +299,7 @@ const Navbar = ({ simple = false }: NavbarProps) => {
                                     )}
                                 </div>
                                 <div className="h-4 w-px bg-gray-300"></div>
-                                <div className="flex items-center gap-1 hover:text-blue-700 cursor-pointer transition-colors">
+                                <div className="flex items-center gap-1 hover:text-indigo-700 cursor-pointer transition-colors">
                                     <Globe className="h-4 w-4" />
                                     <span className="text-xs font-medium uppercase tracking-wide">EN</span>
                                 </div>
@@ -304,7 +309,7 @@ const Navbar = ({ simple = false }: NavbarProps) => {
                             {!user ? (
                                 <button
                                     onClick={() => navigate("/login")}
-                                    className="bg-blue-700 hover:bg-blue-800 text-white text-xs font-medium uppercase tracking-wide px-6 py-2.5 rounded-lg shadow-md shadow-blue-200 hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                                    className="btn-primary py-2 px-6 text-[11px] uppercase tracking-wider"
                                 >
                                     Sign In
                                 </button>
@@ -312,10 +317,14 @@ const Navbar = ({ simple = false }: NavbarProps) => {
                                 <div className="relative" ref={profileRef}>
                                     <button
                                         onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                        className="flex items-center gap-2 hover:bg-slate-50 p-1.5 rounded-lg transition-colors border border-transparent hover:border-slate-100"
+                                        className="flex items-center gap-2 hover:bg-slate-50 p-1 rounded-xl transition-colors border border-transparent hover:border-slate-200"
                                     >
-                                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold border border-blue-200">
-                                            {user.name?.charAt(0).toUpperCase()}
+                                        <div className="h-9 w-9 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200 overflow-hidden shadow-sm">
+                                            {user.profile_photo ? (
+                                                <img src={user.profile_photo} alt="" className="h-full w-full object-cover" />
+                                            ) : (
+                                                user.name?.charAt(0).toUpperCase()
+                                            )}
                                         </div>
                                         <div className="text-left hidden lg:block">
                                             <p className="text-xs font-bold text-slate-800 leading-none">{user.name}</p>
@@ -326,10 +335,10 @@ const Navbar = ({ simple = false }: NavbarProps) => {
 
                                     {/* Dropdown Menu */}
                                     {isProfileOpen && (
-                                        <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-1 animate-in fade-in slide-in-from-top-2 z-[60]">
-                                            <div className="px-4 py-3 border-b border-slate-50">
+                                        <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 py-1 animate-in fade-in slide-in-from-top-2 z-[60]">
+                                            <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 rounded-t-xl mx-1 mt-1 mb-1">
                                                 <p className="text-sm font-bold text-slate-900 truncate">{user.name}</p>
-                                                <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                                                <p className="text-xs font-medium text-slate-500 truncate">{user.email}</p>
                                             </div>
 
                                             <div className="p-1">
@@ -389,7 +398,7 @@ const Navbar = ({ simple = false }: NavbarProps) => {
                             <input
                                 type="text"
                                 placeholder="Search services..."
-                                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
 
@@ -401,8 +410,8 @@ const Navbar = ({ simple = false }: NavbarProps) => {
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     className={({ isActive }) =>
                                         `px-4 py-3 rounded-lg text-sm font-bold uppercase flex justify-between items-center transition-colors ${isActive
-                                            ? "bg-blue-50 text-blue-700"
-                                            : "text-slate-600 hover:bg-slate-50 hover:text-blue-700"
+                                            ? "bg-indigo-50 text-indigo-700"
+                                            : "text-slate-600 hover:bg-slate-50 hover:text-indigo-700"
                                         }`
                                     }
                                 >
@@ -416,19 +425,23 @@ const Navbar = ({ simple = false }: NavbarProps) => {
                             {!user ? (
                                 <button
                                     onClick={() => navigate("/login")}
-                                    className="w-full bg-blue-700 text-white font-bold py-3 rounded-lg uppercase text-sm shadow-lg shadow-blue-200"
+                                    className="w-full bg-indigo-700 text-white font-bold py-3 rounded-lg uppercase text-sm shadow-lg shadow-indigo-200"
                                 >
                                     Sign In
                                 </button>
                             ) : (
                                 <>
                                     <div className="flex items-center gap-3 px-2 py-2">
-                                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
-                                            {user.name?.charAt(0)}
+                                        <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold overflow-hidden shadow-sm border border-indigo-200">
+                                            {user.profile_photo ? (
+                                                <img src={user.profile_photo} alt="" className="h-full w-full object-cover" />
+                                            ) : (
+                                                user.name?.charAt(0)
+                                            )}
                                         </div>
                                         <div>
                                             <p className="font-bold text-slate-900">{user.name}</p>
-                                            <p className="text-xs text-slate-500">{user.email}</p>
+                                            <p className="text-xs font-medium text-slate-500">{user.email}</p>
                                         </div>
                                     </div>
                                     <Link

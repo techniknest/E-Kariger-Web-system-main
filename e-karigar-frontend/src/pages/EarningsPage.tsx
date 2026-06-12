@@ -17,7 +17,7 @@ const EarningsPage = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 text-blue-700 animate-spin" />
+        <Loader2 className="h-6 w-6 text-indigo-700 animate-spin" />
       </div>
     );
   }
@@ -38,7 +38,7 @@ const EarningsPage = () => {
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Total Earnings</p>
               <p className="text-3xl font-bold text-slate-900 mt-1">Rs. {totalEarnings.toLocaleString()}</p>
             </div>
-            <div className="p-3 rounded-lg bg-emerald-50 text-emerald-600">
+            <div className="p-3 rounded-lg bg-green-50 text-green-600">
               <TrendingUp className="h-6 w-6" />
             </div>
           </div>
@@ -49,7 +49,7 @@ const EarningsPage = () => {
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Completed Jobs</p>
               <p className="text-3xl font-bold text-slate-900 mt-1">{completedBookings.length}</p>
             </div>
-            <div className="p-3 rounded-lg bg-blue-50 text-blue-600">
+            <div className="p-3 rounded-lg bg-indigo-50 text-indigo-600">
               <CheckCircle className="h-6 w-6" />
             </div>
           </div>
@@ -102,7 +102,7 @@ const EarningsPage = () => {
                       <span className="text-xs text-slate-600">{booking.client?.name || "Unknown"}</span>
                     </td>
                     <td className="px-5 py-3 text-right">
-                      <span className="text-xs font-bold text-emerald-700">
+                      <span className="text-xs font-bold text-green-700">
                         Rs. {Number(booking.final_price || booking.total_price).toLocaleString()}
                       </span>
                     </td>

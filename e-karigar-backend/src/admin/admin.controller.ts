@@ -18,9 +18,19 @@ export class AdminController {
     return this.adminService.getApprovedVendors();
   }
 
+  @Get('vendors/suspended')
+  async getSuspendedVendors() {
+    return this.adminService.getSuspendedVendors();
+  }
+
   @Patch('vendors/:id/approve')
   async approveVendor(@Param('id') id: string) {
     return this.adminService.approveVendor(id);
+  }
+
+  @Patch('vendors/:id/suspend')
+  async suspendVendor(@Param('id') id: string) {
+    return this.adminService.suspendVendor(id);
   }
 
   @Patch('vendors/:id/reject')
@@ -41,5 +51,15 @@ export class AdminController {
   @Delete('services/:id')
   async deleteService(@Param('id') id: string) {
     return this.adminService.deleteService(id);
+  }
+
+  @Get('vendors/:id')
+  async getVendorDetails(@Param('id') id: string) {
+    return this.adminService.getVendorDetails(id);
+  }
+
+  @Get('vendors/:id/bookings')
+  async getVendorBookings(@Param('id') id: string) {
+    return this.adminService.getVendorBookings(id);
   }
 }

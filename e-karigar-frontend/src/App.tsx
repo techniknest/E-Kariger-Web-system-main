@@ -8,10 +8,13 @@ import ServiceDetailsPage from "./pages/ServiceDetailsPage";
 import ServicesPage from "./pages/ServicesPage";
 import AboutPage from "./pages/AboutPage";
 import DashboardLayoutWrapper from "./layouts/DashboardLayoutWrapper";
-import VendorVerificationList from "./components/admin/VendorVerificationList";
+import VendorManagementPage from "./pages/VendorManagementPage";
+import VendorVerificationsPage from "./pages/admin/VendorVerificationsPage";
+import ViewVendorsPage from "./pages/admin/ViewVendorsPage";
 import JobRequestManager from "./components/vendor/JobRequestManager";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import ProfilePage from "./pages/ProfilePage";
+import VendorDetailsAdmin from "./pages/admin/VendorDetailsAdmin";
 import BookingHistoryPage from "./pages/BookingHistoryPage";
 import EarningsPage from "./pages/EarningsPage";
 
@@ -70,7 +73,7 @@ function App() {
         {/* General Dashboard */}
         <Route path="/dashboard" element={<DashboardLayoutWrapper />}>
           <Route index element={<DashboardPage />} />
-          <Route path="verification" element={<VendorVerificationList />} />
+          <Route path="vendors" element={<VendorManagementPage />} />
           <Route path="jobs" element={<JobRequestManager />} />
         </Route>
 
@@ -88,13 +91,16 @@ function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="jobs" element={<JobRequestManager />} />
           <Route path="earnings" element={<EarningsPage />} />
-          <Route path="verification" element={<VendorVerificationList />} />
+          <Route path="vendors" element={<VendorManagementPage />} />
         </Route>
 
         {/* Admin Dashboard */}
         <Route path="/admin" element={<DashboardLayoutWrapper />}>
           <Route index element={<DashboardPage />} />
-          <Route path="verification" element={<VendorVerificationList />} />
+          <Route path="vendors" element={<VendorManagementPage />} />
+          <Route path="vendors/verifications" element={<VendorVerificationsPage />} />
+          <Route path="vendors/directory" element={<ViewVendorsPage />} />
+          <Route path="vendors/:id" element={<VendorDetailsAdmin />} />
         </Route>
 
         <Route
