@@ -15,6 +15,7 @@ import {
   Star,
   Briefcase,
   ArrowRight,
+  Ban,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import api, { bookingsApi, reviewsApi } from "../services/api";
@@ -147,283 +148,360 @@ const VendorDashboard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 text-blue-700 animate-spin" />
+        <Loader2 className="h-6 w-6 text-indigo-700 animate-spin" />
         <span className="ml-2 text-slate-500 text-sm font-medium">Loading Dashboard...</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* ─── Header ──────────────────────────────────────────────── */}
-      <div>
-        <h1 className="text-lg font-bold tracking-tight text-slate-900">Vendor Dashboard</h1>
-        <p className="text-slate-500 text-sm mt-0.5">
-          Welcome back, <span className="font-medium text-slate-700">{user.name}</span>.
-        </p>
+    <div className="space-y-8 pb-12 animate-in fade-in duration-500">
+      
+      {/* ─── Header & Suspension Alert ──────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 leading-tight">Dashboard Overview</h1>
+            <p className="text-slate-500 text-sm mt-1.5 font-medium">
+              Manage your services, track earnings, and review your professional reputation.
+            </p>
+          </div>
+          {user.vendorStatus === 'SUSPENDED' && (
+             <div className="inline-flex items-center gap-2 bg-red-50 text-red-700 px-3 py-1.5 rounded-lg border border-red-200 text-xs font-bold uppercase tracking-widest shadow-sm">
+                <Ban className="h-4 w-4" /> Account Suspended
+             </div>
+          )}
       </div>
 
-      {/* ─── Stats Grid ──────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {user.vendorStatus === 'SUSPENDED' && (
+        <div className="bg-red-50 border border-red-200 rounded-3xl p-6 sm:p-8 flex items-start gap-4 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-red-500 rounded-full blur-[80px] opacity-10"></div>
+          <div className="p-3 bg-white rounded-xl shadow-sm border border-red-100 shrink-0 relative z-10">
+            <Ban className="h-6 w-6 text-red-600" />
+          </div>
+          <div className="relative z-10">
+            <h3 className="font-bold text-red-900 text-base uppercase tracking-wide">Professional Profile Suspended</h3>
+            <p className="text-red-700 text-sm mt-2 font-medium leading-relaxed max-w-3xl">
+              Your services are currently hidden from the platform and you cannot accept new bookings. Please contact the administrative support team to review your account details and resolve this issue.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Liquid Glass Stats Grid ─────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {[
-          { label: "Active Services", value: services.length, icon: Package, color: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Total Earnings", value: `Rs. ${totalEarnings.toLocaleString()}`, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Total Bookings", value: bookings.length, icon: Users, color: "text-purple-600", bg: "bg-purple-50" },
-          { label: "My Rating", value: ratingData?.averageRating ? `${ratingData.averageRating.toFixed(1)} ⭐` : "N/A", icon: Star, color: "text-amber-600", bg: "bg-amber-50" },
+          { label: "Active Services", value: services.length, icon: Package, color: "text-indigo-600", border: 'ring-indigo-100', bg: "bg-indigo-50", fill: "bg-gradient-to-br from-white to-indigo-50/30" },
+          { label: "Total Revenue", value: `Rs. ${totalEarnings.toLocaleString()}`, icon: TrendingUp, color: "text-emerald-600", border: 'ring-emerald-100', bg: "bg-emerald-50", fill: "bg-gradient-to-br from-white to-emerald-50/30" },
+          { label: "Assignments", value: bookings.length, icon: Users, color: "text-violet-600", border: 'ring-violet-100', bg: "bg-violet-50", fill: "bg-gradient-to-br from-white to-violet-50/30" },
+          { label: "Client Rating", value: ratingData?.averageRating ? `${ratingData.averageRating.toFixed(1)}/5.0` : "N/A", icon: Star, color: "text-amber-600", border: 'ring-amber-100', bg: "bg-amber-50", fill: "bg-gradient-to-br from-white to-amber-50/30" },
         ].map((stat, idx) => (
-          <div key={idx} className="bg-white p-4 rounded-xl border border-slate-200 hover:shadow-sm transition-all">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{stat.label}</p>
-                <p className="text-2xl font-bold text-slate-900 mt-1">{stat.value}</p>
-              </div>
-              <div className={`p-2.5 rounded-lg ${stat.bg} ${stat.color}`}>
-                <stat.icon className="h-5 w-5" />
-              </div>
+          <div key={idx} className={`relative p-6 rounded-[2rem] ring-1 shadow-sm transition-all hover:shadow-md hover:-translate-y-1 ${stat.fill} ${stat.border} overflow-hidden group`}>
+            {/* Soft decorative background element */}
+            <div className={`absolute -bottom-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-50 transition-opacity group-hover:opacity-100 ${stat.bg}`}></div>
+            
+            <div className="flex flex-col gap-4 relative z-10">
+                <div className={`self-start p-3 rounded-2xl ${stat.bg} ${stat.color} ring-1 ring-white/50 shadow-sm`}>
+                    <stat.icon className="h-6 w-6" />
+                </div>
+                <div>
+                    <h4 className="text-[11px] font-black text-slate-400 tracking-[0.2em] uppercase mb-1">{stat.label}</h4>
+                    <p className="text-3xl font-black text-slate-900 tracking-tight">{stat.value}</p>
+                </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* ─── Quick Actions ───────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <button
-          onClick={() => {
-            setEditingServiceId(null);
-            setFormData({ title: "", description: "", price: "", imageFile: null });
-            setShowForm(true);
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-          className="flex items-center gap-3 bg-blue-700 text-white px-5 py-3.5 rounded-xl hover:bg-blue-800 transition-all shadow-sm font-medium text-sm"
-        >
-          <Plus className="h-4 w-4" />
-          Add New Service
-        </button>
-        <button
-          onClick={() => navigate("/vendor/jobs")}
-          className="flex items-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl hover:bg-slate-50 transition-all border border-slate-200 font-medium text-sm"
-        >
-          <Briefcase className="h-4 w-4 text-slate-400" />
-          View My Jobs
-          {pendingJobs > 0 && (
-            <span className="ml-auto bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">
-              {pendingJobs} new
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => navigate("/vendor/earnings")}
-          className="flex items-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl hover:bg-slate-50 transition-all border border-slate-200 font-medium text-sm"
-        >
-          <TrendingUp className="h-4 w-4 text-slate-400" />
-          View Earnings
-          <ArrowRight className="h-3.5 w-3.5 ml-auto text-slate-400" />
-        </button>
+      {/* ─── Active Operations / Actions ──────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Quick Actions (Col-Span 8) */}
+        <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <button
+                onClick={() => {
+                    if (user.vendorStatus === 'SUSPENDED') {
+                    toast.error("Suspended vendors cannot list new services.");
+                    return;
+                    }
+                    setEditingServiceId(null);
+                    setFormData({ title: "", description: "", price: "", imageFile: null });
+                    setShowForm(true);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                disabled={user.vendorStatus === 'SUSPENDED'}
+                className={`relative overflow-hidden group flex flex-col justify-between p-6 rounded-3xl transition-all shadow-sm ring-1 ring-black/5 min-h-[140px] text-left
+                    ${user.vendorStatus === 'SUSPENDED' 
+                        ? 'bg-slate-50 cursor-not-allowed opacity-70' 
+                        : 'bg-indigo-600 text-white hover:shadow-lg shadow-indigo-600/20 active:scale-[0.98]'}`}
+            >
+                {user.vendorStatus !== 'SUSPENDED' && (
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl transform group-hover:scale-150 transition-transform duration-700"></div>
+                )}
+                <div className={`p-2.5 rounded-xl self-start ${user.vendorStatus === 'SUSPENDED' ? 'bg-slate-200 text-slate-400' : 'bg-white/20 text-white backdrop-blur-sm'}`}>
+                    <Plus className="h-5 w-5" />
+                </div>
+                <div>
+                    <h4 className={`text-base font-bold mb-1 ${user.vendorStatus === 'SUSPENDED' ? 'text-slate-500' : 'text-white'}`}>Publish Service</h4>
+                    <p className={`text-[11px] font-medium ${user.vendorStatus === 'SUSPENDED' ? 'text-slate-400' : 'text-indigo-100'}`}>Create a new listing</p>
+                </div>
+            </button>
+
+            <button onClick={() => navigate("/vendor/jobs")} className="flex flex-col justify-between p-6 rounded-3xl bg-white hover:bg-slate-50 ring-1 ring-slate-200 shadow-sm hover:shadow-md transition-all active:scale-[0.98] min-h-[140px] text-left group">
+                <div className="flex items-center justify-between w-full">
+                    <div className="p-2.5 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                        <Briefcase className="h-5 w-5" />
+                    </div>
+                    {pendingJobs > 0 && (
+                        <span className="bg-amber-100 text-amber-700 border border-amber-200 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest shadow-sm">
+                        {pendingJobs} New
+                        </span>
+                    )}
+                </div>
+                <div>
+                    <h4 className="text-base font-bold text-slate-900 mb-1">Assignment Log</h4>
+                    <p className="text-[11px] font-medium text-slate-500">Track client requests</p>
+                </div>
+            </button>
+
+            <button onClick={() => navigate("/vendor/earnings")} className="flex flex-col justify-between p-6 rounded-3xl bg-white hover:bg-slate-50 ring-1 ring-slate-200 shadow-sm hover:shadow-md transition-all active:scale-[0.98] min-h-[140px] text-left group">
+                <div className="flex items-center justify-between w-full">
+                    <div className="p-2.5 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                        <TrendingUp className="h-5 w-5" />
+                    </div>
+                </div>
+                <div>
+                    <h4 className="text-base font-bold text-slate-900 mb-1">Financial Report</h4>
+                    <p className="text-[11px] font-medium text-slate-500">View payout history</p>
+                </div>
+            </button>
+        </div>
+
+        {/* Active Banner (Col-Span 4) */}
+        <div className="lg:col-span-4">
+           {activeJobs > 0 ? (
+               <div className="h-full bg-gradient-to-br from-indigo-900 to-slate-900 rounded-[2rem] p-6 lg:p-8 text-white relative overflow-hidden flex flex-col justify-center ring-1 ring-indigo-900/50 shadow-xl shadow-indigo-900/10">
+                   <div className="absolute -right-4 -bottom-4 opacity-10">
+                       <Briefcase className="w-40 h-40" />
+                   </div>
+                   <div className="relative z-10">
+                        <div className="inline-flex items-center gap-1.5 bg-indigo-500/30 border border-indigo-400/30 text-indigo-100 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            In Progress
+                        </div>
+                        <h3 className="text-3xl font-black tracking-tight mb-2">{activeJobs} Job{activeJobs !== 1 && 's'}</h3>
+                        <p className="text-indigo-200 text-sm font-medium leading-relaxed mb-6">
+                            You currently have active assignments pending completion.
+                        </p>
+                        <button onClick={() => navigate("/vendor/jobs")} className="w-full bg-white text-indigo-900 py-3 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 active:scale-95 shadow-lg">
+                            Manage Workspace <ArrowRight className="h-4 w-4" />
+                        </button>
+                   </div>
+               </div>
+           ) : (
+                <div className="h-full bg-slate-100 rounded-[2rem] p-6 text-center flex flex-col items-center justify-center border border-slate-200 border-dashed">
+                    <div className="h-14 w-14 rounded-full bg-white flex items-center justify-center mb-4 shadow-sm border border-slate-200">
+                        <Briefcase className="h-6 w-6 text-slate-300" />
+                    </div>
+                    <p className="text-sm font-bold text-slate-800">No Active Jobs</p>
+                    <p className="text-xs text-slate-500 mt-1 font-medium px-4">Your schedule is completely clear for the day.</p>
+                </div>
+           )}
+        </div>
       </div>
 
-      {/* ─── Active Jobs Banner ───────────────────────────────────── */}
-      {activeJobs > 0 && (
-        <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-5 py-3">
-          <Briefcase className="h-4 w-4 text-blue-700 shrink-0" />
-          <p className="text-sm text-blue-800">
-            You have <span className="font-bold">{activeJobs} active job{activeJobs > 1 ? "s" : ""}</span> in progress.
-          </p>
-          <button
-            onClick={() => navigate("/vendor/jobs")}
-            className="ml-auto text-xs font-bold text-blue-700 hover:text-blue-900 transition-colors"
-          >
-            View →
-          </button>
+      {/* ─── Service Form Panel ──────────────────────────────────────── */}
+      {showForm && (
+        <div className="bg-white rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/40 overflow-hidden transform animate-in slide-in-from-bottom-4 duration-500">
+            <div className="px-6 py-5 sm:px-8 sm:py-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <div>
+                    <h3 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                        {editingServiceId ? <Edit2 className="h-5 w-5 text-indigo-600" /> : <Plus className="h-5 w-5 text-indigo-600" />}
+                        {editingServiceId ? "Modify Service Matrix" : "Deploy New Listing"}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1 font-medium">Configure network-facing details for this service offering.</p>
+                </div>
+                <button onClick={cancelEdit} className="p-2 bg-white ring-1 ring-slate-200 rounded-lg text-slate-400 hover:text-slate-600 shadow-sm transition-all hover:bg-slate-50">
+                    <Ban className="h-4 w-4" />
+                </button>
+            </div>
+            <div className="p-6 sm:p-8">
+                <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Service Identity Title</label>
+                            <input
+                                type="text"
+                                className="input-field"
+                                placeholder="e.g., HVAC Maintenance & Repair"
+                                value={formData.title}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Base Pricing Metric (Rs)</label>
+                            <input
+                                type="number"
+                                className="input-field"
+                                placeholder="Base service rate (e.g., 500)"
+                                value={formData.price}
+                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                required
+                                min="0"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Operational Description</label>
+                        <textarea
+                            className="input-field min-h-[120px] resize-y"
+                            placeholder="Detail exactly what this service guarantees..."
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            required
+                        />
+                    </div>
+                    
+                    <div>
+                        <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Visual Asset (Optional, Max 1MB)</label>
+                        <div className="flex items-center gap-4">
+                            <div className="flex-1">
+                                <input
+                                    type="file"
+                                    accept="image/png, image/jpeg, image/jpg"
+                                    className="block w-full text-sm text-slate-500
+                                      file:mr-4 file:py-3 file:px-6
+                                      file:rounded-xl file:border-0
+                                      file:text-xs file:font-black file:uppercase file:tracking-wide
+                                      file:bg-indigo-50 file:text-indigo-700
+                                      hover:file:bg-indigo-100 transition-all cursor-pointer bg-slate-50 border border-slate-200 rounded-xl"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            if (file.size > 1024 * 1024) {
+                                                toast.error("File size limits exceeded (Max 1MB).");
+                                                e.target.value = "";
+                                                return;
+                                            }
+                                            setFormData({ ...formData, imageFile: file });
+                                        }
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
+                        <button type="button" onClick={cancelEdit} className="btn-secondary">
+                            Cancel
+                        </button>
+                        <button type="submit" disabled={submitting} className="btn-primary">
+                            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                            {editingServiceId ? "Sync Metadata" : "Broadcast Service"}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
       )}
 
-      {/* ─── My Services Section ─────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-slate-900">My Services</h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {services.length} service{services.length !== 1 ? "s" : ""} listed
-            </p>
-          </div>
-          {!showForm && services.length > 0 && (
-            <button
-              onClick={() => {
-                setEditingServiceId(null);
-                setFormData({ title: "", description: "", price: "", imageFile: null });
-                setShowForm(true);
-              }}
-              className="flex items-center gap-1.5 bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-xs font-medium"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add Service
-            </button>
-          )}
+      {/* ─── Service Grid Portfolio ──────────────────────────────────── */}
+      <div>
+        <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold tracking-tight text-slate-900 border-l-4 border-indigo-600 pl-3">
+                Service Catalog
+            </h2>
+            {!showForm && services.length > 0 && (
+                <button
+                    onClick={() => {
+                        if (user.vendorStatus === 'SUSPENDED') return toast.error("Account suspended.");
+                        setEditingServiceId(null);
+                        setFormData({ title: "", description: "", price: "", imageFile: null });
+                        setShowForm(true);
+                    }}
+                    className="flex flex-row items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition-colors"
+                >
+                    <Plus className="h-3.5 w-3.5" /> Add Listing
+                </button>
+            )}
         </div>
 
-        {/* Add/Edit Service Form */}
-        {showForm && (
-          <div className="p-6 bg-slate-50 border-b border-slate-200">
-            <div className="max-w-2xl mx-auto">
-              <h4 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-                {editingServiceId ? <Edit2 className="h-4 w-4 text-blue-600" /> : <Plus className="h-4 w-4 text-blue-600" />}
-                {editingServiceId ? "Edit Service" : "Create a New Service"}
-              </h4>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">Service Title</label>
-                    <input
-                      type="text"
-                      className="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-white"
-                      placeholder="e.g., AC Repair & Servicing"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">Starting Price (Rs)</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-slate-400 text-sm">Rs.</span>
-                      <input
-                        type="number"
-                        className="w-full p-2.5 pl-10 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-white"
-                        placeholder="500"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                        required
-                        min="0"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1.5">Description</label>
-                  <textarea
-                    className="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none resize-none transition bg-white"
-                    rows={3}
-                    placeholder="Describe your service in detail..."
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1.5">Service Image (Max 1MB)</label>
-                  <input
-                    type="file"
-                    accept="image/png, image/jpeg, image/jpg"
-                    className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-white file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        if (file.size > 1024 * 1024) {
-                          toast.error("File size must be less than 1MB");
-                          e.target.value = "";
-                          return;
-                        }
-                        setFormData({ ...formData, imageFile: file });
-                      }
-                    }}
-                  />
-                </div>
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={cancelEdit}
-                    className="px-4 py-2 text-slate-600 hover:bg-white border border-transparent hover:border-slate-200 rounded-lg transition text-xs font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="px-6 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition shadow-sm disabled:opacity-50 flex items-center gap-1.5 text-xs font-medium"
-                  >
-                    {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                    {editingServiceId ? "Update Service" : "Publish Service"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Service List */}
         {services.length === 0 && !showForm ? (
-          <div className="p-12 text-center">
-            <div className="bg-slate-100 p-4 rounded-full inline-block mb-4">
-              <Archive className="h-8 w-8 text-slate-400" />
-            </div>
-            <h3 className="text-slate-900 text-sm font-bold mb-1">No Services Yet</h3>
-            <p className="text-slate-500 text-xs mb-6 max-w-xs mx-auto">
-              Create your first service to start receiving bookings from local customers.
-            </p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="px-6 py-2.5 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition shadow-sm text-xs font-bold"
-            >
-              Add Your First Service
-            </button>
-          </div>
-        ) : (
-          !showForm && (
-            <div className="divide-y divide-slate-100">
-              {services.map((service) => (
-                <div key={service.id} className="p-5 hover:bg-slate-50/50 transition-colors group">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2.5 mb-1.5">
-                        <h4 className="font-bold text-sm text-slate-900 group-hover:text-blue-700 transition-colors truncate">
-                          {service.title}
-                        </h4>
-                        <span
-                          className={`px-2 py-0.5 text-[10px] font-bold rounded-full border shrink-0 ${
-                            service.is_active
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                              : "bg-slate-100 text-slate-500 border-slate-200"
-                          }`}
-                        >
-                          {service.is_active ? "ACTIVE" : "INACTIVE"}
-                        </span>
-                      </div>
-                      <p className="text-slate-500 text-xs line-clamp-1 mb-2 max-w-xl">{service.description}</p>
-                      <div className="flex items-center gap-5 text-xs text-slate-500">
-                        <span className="flex items-center gap-1 text-slate-800 font-semibold">
-                          <DollarSign className="h-3.5 w-3.5 text-emerald-500" />
-                          Rs. {service.price}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {new Date(service.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-1.5 shrink-0">
-                      <button
-                        onClick={() => handleEdit(service)}
-                        className="px-3 py-1.5 text-slate-600 hover:bg-white border border-transparent hover:border-slate-200 hover:shadow-sm rounded-lg transition text-xs font-medium flex items-center gap-1.5"
-                      >
-                        <Edit2 className="h-3 w-3" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(service.id)}
-                        className="px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-lg transition text-xs font-medium flex items-center gap-1.5"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        Delete
-                      </button>
-                    </div>
-                  </div>
+            <div className="bg-white border border-slate-200 border-dashed rounded-[2rem] p-16 text-center shadow-sm">
+                <div className="bg-indigo-50 p-6 rounded-3xl inline-flex mb-6 ring-1 ring-indigo-100/50">
+                    <Package className="h-10 w-10 text-indigo-400" />
                 </div>
-              ))}
+                <h3 className="text-xl font-bold text-slate-900 mb-2 tracking-tight">Empty Catalog Layer</h3>
+                <p className="text-slate-500 text-sm mb-8 max-w-sm mx-auto font-medium">
+                    Deploy your first service listing to the network so clients can begin dispatching assignments.
+                </p>
+                <button onClick={() => setShowForm(true)} className="btn-primary mx-auto">
+                    Initialize First Service
+                </button>
             </div>
-          )
+        ) : (
+            !showForm && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {services.map((service) => (
+                        <div key={service.id} className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all group flex flex-col">
+                            {/* Service Image Header */}
+                            <div className="h-40 bg-slate-100 relative overflow-hidden ring-1 ring-black/5 ring-inset">
+                                {service.images && service.images.length > 0 ? (
+                                    <img src={service.images[0]} alt={service.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400">
+                                        <Package className="h-10 w-10 mb-2 opacity-50" />
+                                        <span className="text-[10px] font-bold uppercase tracking-widest">No Visual</span>
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
+                                <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+                                    <span className={`px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg border backdrop-blur-md ${
+                                        service.is_active 
+                                          ? "bg-emerald-500/20 text-emerald-100 border-emerald-400/30" 
+                                          : "bg-slate-900/40 text-slate-300 border-slate-500/50"
+                                    }`}>
+                                        {service.is_active ? "Live" : "Offline"}
+                                    </span>
+                                    <div className="bg-white/95 backdrop-blur shadow-sm text-slate-900 px-3 py-1.5 rounded-xl font-black text-sm flex items-center gap-1">
+                                       <span className="text-[10px] text-slate-500 font-bold uppercase">Rs.</span> {service.price}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Service Details Body */}
+                            <div className="p-5 sm:p-6 flex-1 flex flex-col bg-white">
+                                <h4 className="font-bold text-lg text-slate-900 tracking-tight leading-tight mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                                    {service.title}
+                                </h4>
+                                <p className="text-slate-500 text-sm font-medium line-clamp-3 mb-6 bg-slate-50 rounded-xl p-3 ring-1 ring-slate-100/50 leading-relaxed overflow-hidden">
+                                    {service.description || "No description provided."}
+                                </p>
+                                
+                                <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                                    <button
+                                        onClick={() => handleEdit(service)}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 text-slate-600 hover:bg-slate-100 ring-1 ring-slate-200 hover:text-slate-900 rounded-xl transition-all text-xs font-bold shadow-sm"
+                                    >
+                                        <Edit2 className="h-3.5 w-3.5" /> Configure
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(service.id)}
+                                        className="p-2.5 bg-white text-red-500 hover:bg-red-50 hover:text-red-700 ring-1 ring-red-100 hover:ring-red-200 rounded-xl transition-all shadow-sm"
+                                        title="Delete Framework"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )
         )}
       </div>
+
     </div>
   );
 };

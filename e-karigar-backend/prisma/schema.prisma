@@ -17,11 +17,13 @@ model User {
   is_active       Boolean         @default(true)
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
+  profile_photo   String?         @map("profile_photo")
   admin_logs      AdminAuditLog[]
   client_bookings Booking[]       @relation("ClientBookings")
   sent_messages   ChatMessage[]
   reviews_written Review[]
   vendor_profile  VendorProfile?
+  notifications   Notification[]
 
   @@map("users")
 }
@@ -195,4 +197,19 @@ enum VendorVerificationStatus {
   PENDING
   APPROVED
   REJECTED
+  SUSPENDED
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  user_id    String
+  type       String   
+  title      String
+  message    String
+  is_read    Boolean  @default(false)
+  link       String?  
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }

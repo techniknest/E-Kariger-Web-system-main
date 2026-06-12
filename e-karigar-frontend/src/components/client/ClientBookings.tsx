@@ -52,11 +52,11 @@ const ClientBookings = ({ bookings, onRefresh }: ClientBookingsProps) => {
             case "ACCEPTED":
                 return <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold border border-green-200 flex items-center gap-1"><CheckCircle className="h-3 w-3" /> ACCEPTED</span>;
             case "IN_PROGRESS":
-                return <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold border border-blue-200 flex items-center gap-1"><Play className="h-3 w-3" /> IN PROGRESS</span>;
+                return <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-bold border border-indigo-200 flex items-center gap-1"><Play className="h-3 w-3" /> IN PROGRESS</span>;
             case "WAITING_APPROVAL":
                 return <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-bold border border-orange-200 flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> PRICE REVISED</span>;
             case "COMPLETED":
-                return <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200 flex items-center gap-1"><CheckCircle className="h-3 w-3" /> COMPLETED</span>;
+                return <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold border border-green-200 flex items-center gap-1"><CheckCircle className="h-3 w-3" /> COMPLETED</span>;
             case "REJECTED":
                 return <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-bold border border-red-200 flex items-center gap-1"><XCircle className="h-3 w-3" /> REJECTED</span>;
             case "CANCELLED":

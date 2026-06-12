@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { VendorVerificationStatus } from '@prisma/client';
 
 @Injectable()
 export class ServicesService {
@@ -7,12 +8,15 @@ export class ServicesService {
 
   async findAll() {
     return this.prisma.service.findMany({
-      where: { is_active: true },
+      where: { 
+        is_active: true,
+        vendor: {
+          approval_status: 'APPROVED'
+        }
+      },
       include: {
         vendor: {
           include: {
-            // "city" is already inside 'vendor', so we don't need to ask for it here.
-            // We only need to ask for the name from the 'user' relation.
             user: { select: { name: true } }
           }
         },
@@ -27,7 +31,7 @@ export class ServicesService {
       include: {
         vendor: {
           include: {
-            user: { select: { name: true, email: true } },
+            user: { select: { name: true, email: true, profile_photo: true } },
             reviews_received: {
               include: {
                 client: { select: { name: true } },
@@ -39,7 +43,9 @@ export class ServicesService {
         category: true,
       },
     });
-    if (!service) throw new NotFoundException('Service not found');
+    if (!service || service.vendor.approval_status !== 'APPROVED') {
+      throw new NotFoundException('Service not found or vendor is not active');
+    }
 
     // Compute aggregate rating for this vendor
     const reviews = service.vendor.reviews_received;
@@ -63,6 +69,10 @@ export class ServicesService {
     });
 
     if (!vendor) throw new NotFoundException("Vendor profile not found");
+
+    if (vendor.approval_status !== VendorVerificationStatus.APPROVED) {
+      throw new ForbiddenException(`You cannot create services because your account is ${vendor.approval_status.toLowerCase()}`);
+    }
 
     // Handle Category (Default to 'General' if missing)
     let category = await this.prisma.category.findFirst();

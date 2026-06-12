@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
-import { User, Phone, Mail, MapPin, Briefcase, Clock, ShieldCheck, Save, Loader2, AlertCircle, CreditCard, Wrench } from "lucide-react";
+import { User, Phone, Mail, MapPin, Briefcase, Clock, ShieldCheck, Save, Loader2, AlertCircle, CreditCard, Wrench, Camera, X } from "lucide-react";
 import { authApi, vendorsApi } from "../services/api";
 import { toast } from "react-hot-toast";
 import Navbar from "../components/Navbar";
@@ -20,6 +20,8 @@ const ProfilePage = () => {
     const [vendorProfile, setVendorProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [photoFile, setPhotoFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     const { 
         register, 
@@ -59,6 +61,10 @@ const ProfilePage = () => {
                 experience_years: vData?.experience_years || 0,
                 description: vData?.description || "",
             });
+
+            if (userData.profile_photo) {
+                setPreviewUrl(userData.profile_photo);
+            }
             
         } catch (error) {
             console.error("Failed to fetch profile:", error);
@@ -72,9 +78,10 @@ const ProfilePage = () => {
         setSaving(true);
         try {
             // 1. Update Basic Profile
-            await authApi.updateProfile({
+            const updateResult = await authApi.updateProfile({
                 name: data.name,
                 phone: data.phone,
+                profilePhoto: photoFile || undefined,
             });
 
             // 2. Update Vendor Profile if exists
@@ -90,9 +97,15 @@ const ProfilePage = () => {
             toast.success("Profile updated successfully!");
             // Update local storage user object if needed
             const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-            const updatedUser = { ...storedUser, name: data.name };
+            const updatedUser = { 
+                ...storedUser, 
+                name: data.name,
+                profile_photo: updateResult.profile_photo || storedUser.profile_photo
+            };
             localStorage.setItem("user", JSON.stringify(updatedUser));
             window.dispatchEvent(new Event("auth-change"));
+            
+            setPhotoFile(null); // Clear pending file
             
             // Refresh data
             await fetchProfileData(); 
@@ -109,268 +122,312 @@ const ProfilePage = () => {
         }
     };
 
+    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                toast.error("File too large. Max 2MB");
+                return;
+            }
+            setPhotoFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const removePhoto = () => {
+        setPhotoFile(null);
+        setPreviewUrl(user?.profile_photo || null);
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-slate-50">
                 <Navbar />
                 <div className="flex items-center justify-center min-h-[60vh]">
-                    <Loader2 className="w-8 h-8 text-blue-700 animate-spin" />
+                    <Loader2 className="w-8 h-8 text-indigo-700 animate-spin" />
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 font-['Inter',_sans-serif]">
+        <div className="min-h-screen bg-slate-50 font-['Open Sans',_sans-serif]">
             <Navbar />
             
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                <div className="max-w-3xl mx-auto space-y-8">
-                    <header>
-                        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Account Settings</h1>
-                        <p className="text-sm text-slate-500 mt-1">Update your profile and manage your personal details.</p>
-                    </header>
-
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-20">
-                        {/* Basic Information Card */}
+                <div className="flex flex-col lg:flex-row gap-8 items-start">
+                    
+                    {/* LEFT COLUMN: Profile Summary (Sidebar) */}
+                    <div className="w-full lg:w-1/3 space-y-6">
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
                         >
-                            <div className="p-5 border-b border-slate-100 bg-white flex justify-between items-center">
-                                <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Basic Information</h2>
-                            </div>
-
-                            <div className="p-6 space-y-5">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-left">
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-700 ml-0.5 uppercase tracking-wide">Full Name <span className="text-red-500">*</span></label>
-                                        <div className="relative">
-                                            <User className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                                            <input
-                                                type="text"
-                                                {...register("name", { 
-                                                    required: "Full name is required",
-                                                    minLength: { value: 3, message: "Name must be at least 3 characters" }
-                                                })}
-                                                placeholder="Enter your full name"
-                                                className={`w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border ${errors.name ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-blue-100'} rounded-lg focus:ring-2 focus:border-blue-700 outline-none transition-all text-slate-800 font-medium`}
-                                            />
+                            <div className="h-24 bg-gradient-to-r from-indigo-600 to-indigo-700"></div>
+                            <div className="px-6 pb-6 -mt-12">
+                                <div className="flex flex-col items-center">
+                                    <div className="relative group">
+                                        <div className="h-28 w-28 rounded-full overflow-hidden border-4 border-white shadow-xl bg-slate-100 flex items-center justify-center relative bg-white">
+                                            {previewUrl ? (
+                                                <img src={previewUrl} alt="Profile" className="h-full w-full object-cover" />
+                                            ) : (
+                                                <User className="h-12 w-12 text-slate-300" />
+                                            )}
+                                            <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white">
+                                                <Camera className="h-6 w-6 mb-1" />
+                                                <span className="text-[10px] font-bold uppercase tracking-wider">Change</span>
+                                                <input type="file" className="hidden" accept="image/*" onChange={handlePhotoChange} />
+                                            </label>
                                         </div>
-                                        {errors.name && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {errors.name.message}</p>}
+                                        {photoFile && (
+                                            <button 
+                                                type="button"
+                                                onClick={removePhoto}
+                                                className="absolute -top-1 -right-1 bg-red-500 text-white p-1.5 rounded-full shadow-lg hover:bg-red-600 transition-colors z-10 border-2 border-white"
+                                            >
+                                                <X className="h-3 w-3" />
+                                            </button>
+                                        )}
                                     </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-700 ml-0.5 uppercase tracking-wide">Email Address</label>
-                                        <div className="relative opacity-60">
-                                            <Mail className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                                            <input
-                                                type="email"
-                                                value={user?.email || ""}
-                                                disabled
-                                                className="w-full pl-10 pr-4 py-2 text-sm bg-slate-100 border border-slate-200 rounded-lg cursor-not-allowed font-medium text-slate-600"
-                                            />
+                                    
+                                    <div className="mt-4 text-center">
+                                        <h2 className="text-xl font-black text-slate-900 leading-tight">{user?.name}</h2>
+                                        <div className="flex items-center justify-center gap-2 mt-2">
+                                            <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                                {user?.role}
+                                            </span>
+                                            {vendorProfile && (
+                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                                                    vendorProfile.approval_status === "APPROVED" ? "bg-green-50 text-green-700 border-green-100" :
+                                                    vendorProfile.approval_status === "PENDING" ? "bg-amber-50 text-amber-700 border-amber-100" : "bg-red-50 text-red-700 border-red-100"
+                                                }`}>
+                                                    {vendorProfile.approval_status}
+                                                </span>
+                                            )}
                                         </div>
-                                        <p className="text-[10px] text-slate-400 ml-1 italic font-medium">Email cannot be changed.</p>
                                     </div>
-
-                                    <div className="space-y-1.5 flex flex-col justify-start">
-                                        <label className="text-xs font-semibold text-slate-700 ml-0.5 uppercase tracking-wide">Phone Number</label>
-                                        <div className="relative">
-                                            <Phone className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                                            <input
-                                                type="text"
-                                                {...register("phone", {
-                                                    pattern: { value: /^[0-9+\s()-]{10,15}$/, message: "Please enter a valid phone number" }
-                                                })}
-                                                placeholder="+92 3XX XXXXXXX"
-                                                className={`w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border ${errors.phone ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-blue-100'} rounded-lg focus:ring-2 focus:border-blue-700 outline-none transition-all text-slate-800 font-medium`}
-                                            />
+                                </div>
+                                
+                                <div className="mt-8 space-y-4 pt-6 border-t border-slate-50">
+                                    <div className="flex items-center gap-3 text-slate-600">
+                                        <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
+                                            <Mail className="h-4 w-4" />
                                         </div>
-                                        {errors.phone && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {errors.phone.message}</p>}
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</p>
+                                            <p className="text-sm font-semibold text-slate-700 truncate">{user?.email}</p>
+                                        </div>
                                     </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-700 ml-0.5 uppercase tracking-wide">Account Role</label>
-                                        <div className="relative opacity-60">
-                                            <ShieldCheck className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                                            <input
-                                                type="text"
-                                                value={user?.role || ""}
-                                                disabled
-                                                className="w-full pl-10 pr-4 py-2 text-sm bg-slate-100 border border-slate-200 rounded-lg cursor-not-allowed font-medium text-slate-600 uppercase"
-                                            />
+                                    <div className="flex items-center gap-3 text-slate-600">
+                                        <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
+                                            <ShieldCheck className="h-4 w-4" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Account Status</p>
+                                            <p className="text-sm font-semibold text-slate-700">Active Account</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </motion.div>
 
-                        {/* Professional Section (Only for Vendors) */}
-                        {vendorProfile && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 }}
-                                className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
-                            >
-                                <div className="p-5 border-b border-slate-100 bg-white flex items-center justify-between">
-                                    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Professional Info</h2>
-                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                                        vendorProfile.approval_status === "APPROVED" ? "bg-green-50 text-green-700 border border-green-100" :
-                                        vendorProfile.approval_status === "PENDING" ? "bg-amber-50 text-amber-700 border border-amber-100" : "bg-red-50 text-red-700 border border-red-100"
-                                    }`}>
-                                        {vendorProfile.approval_status}
-                                    </span>
-                                </div>
-
-                                <div className="p-6 space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-left">
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-semibold text-slate-700 ml-0.5 uppercase tracking-wide">City <span className="text-red-500">*</span></label>
-                                            <div className="relative">
-                                                <MapPin className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                                                <input
-                                                    type="text"
-                                                    {...register("city", { required: "City is required for active vendors" })}
-                                                    placeholder="e.g. Islamabad"
-                                                    className={`w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border ${errors.city ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-blue-100'} rounded-lg focus:ring-2 focus:border-blue-700 outline-none transition-all text-slate-800 font-medium`}
-                                                />
-                                            </div>
-                                            {errors.city && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {errors.city.message}</p>}
-                                        </div>
-
-                                        <div className="space-y-1.5 flex flex-col justify-start">
-                                            <label className="text-xs font-semibold text-slate-700 ml-0.5 uppercase tracking-wide">Business Phone <span className="text-red-500">*</span></label>
-                                            <div className="relative">
-                                                <Phone className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                                                <input
-                                                    type="text"
-                                                    {...register("business_phone", { 
-                                                        required: "Business phone is required",
-                                                        pattern: { value: /^[0-9+\s()-]{10,15}$/, message: "Please enter a valid phone number" }
-                                                    })}
-                                                    placeholder="Public contact number"
-                                                    className={`w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border ${errors.business_phone ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-blue-100'} rounded-lg focus:ring-2 focus:border-blue-700 outline-none transition-all text-slate-800 font-medium`}
-                                                />
-                                            </div>
-                                            {errors.business_phone && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {errors.business_phone.message}</p>}
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-semibold text-slate-700 ml-0.5 uppercase tracking-wide">Experience (Years) <span className="text-red-500">*</span></label>
-                                            <div className="relative">
-                                                <Clock className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                                                <input
-                                                    type="number"
-                                                    {...register("experience_years", { 
-                                                        required: "Experience is required",
-                                                        min: { value: 0, message: "Experience cannot be negative" },
-                                                        valueAsNumber: true,
-                                                    })}
-                                                    className={`w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border ${errors.experience_years ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-blue-100'} rounded-lg focus:ring-2 focus:border-blue-700 outline-none transition-all text-slate-800 font-medium`}
-                                                />
-                                            </div>
-                                            {errors.experience_years && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {errors.experience_years.message}</p>}
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-semibold text-slate-700 ml-0.5 uppercase tracking-wide">Business Type</label>
-                                            <div className="relative opacity-60">
-                                                <Briefcase className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                                                <input
-                                                    type="text"
-                                                    value={vendorProfile.vendor_type || "INDIVIDUAL"}
-                                                    disabled
-                                                    className="w-full pl-10 pr-4 py-2 text-sm bg-slate-100 border border-slate-200 rounded-lg cursor-not-allowed font-medium text-slate-600 uppercase"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-1.5 flex flex-col justify-start">
-                                            <label className="text-xs font-semibold text-slate-700 ml-0.5 uppercase tracking-wide">CNIC Number</label>
-                                            <div className="relative opacity-60">
-                                                <CreditCard className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                                                <input
-                                                    type="text"
-                                                    value={vendorProfile.cnic || ""}
-                                                    disabled
-                                                    className="w-full pl-10 pr-4 py-2 text-sm bg-slate-100 border border-slate-200 rounded-lg cursor-not-allowed font-medium text-slate-600 tracking-wider"
-                                                />
-                                            </div>
-                                            <p className="text-[10px] text-slate-400 ml-1 italic font-medium">CNIC is verified and locked.</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1.5 text-left flex flex-col justify-start">
-                                        <label className="text-xs font-semibold text-slate-700 ml-0.5 uppercase tracking-wide">Business Description <span className="text-red-500">*</span></label>
-                                        <textarea
-                                            {...register("description", { 
-                                                required: "Description is required",
-                                                minLength: { value: 10, message: "Description must be at least 10 characters long" }
-                                            })}
-                                            rows={4}
-                                            placeholder="Tell us about your services and expertise..."
-                                            className={`w-full px-4 py-2.5 bg-slate-50 border ${errors.description ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-blue-100'} rounded-lg focus:ring-2 focus:border-blue-700 outline-none transition-all text-slate-800 font-medium resize-none text-sm`}
-                                        />
-                                        {errors.description && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {errors.description.message}</p>}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* Services Section (Only for Vendors) */}
-                        {vendorProfile && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
-                            >
-                                <div className="p-5 border-b border-slate-100 bg-white flex items-center justify-between">
-                                    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                                        <Wrench className="w-4 h-4 text-blue-700" />
-                                        My Offered Services
-                                    </h2>
-                                </div>
-                                <div className="p-6 text-left bg-slate-50/50">
-                                    {!vendorProfile.services || vendorProfile.services.length === 0 ? (
-                                        <div className="text-center py-6">
-                                            <p className="text-sm text-slate-500 font-medium">You haven't listed any services yet.</p>
-                                        </div>
-                                    ) : (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            {vendorProfile.services.map((service: any) => (
-                                                <div key={service.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm transition-shadow hover:shadow-md flex flex-col justify-between">
-                                                    <div>
-                                                        <h3 className="font-bold text-slate-900 text-sm line-clamp-1">{service.title}</h3>
-                                                        <p className="text-xs text-slate-500 mt-1 line-clamp-2">{service.description}</p>
-                                                    </div>
-                                                    <p className="text-blue-700 font-black text-sm mt-3 bg-blue-50 w-fit px-2 py-1 rounded">Rs. {service.price}</p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </motion.div>
-                        )}
-
-                        <div className="flex justify-end pt-2">
-                            <button
-                                type="submit"
-                                disabled={saving}
-                                className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 px-10 rounded-lg shadow-lg shadow-blue-200 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:hover:translate-y-0 flex items-center justify-center gap-2 text-sm"
-                            >
-                                {saving ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                    <Save className="w-4 h-4" />
-                                )}
-                                {saving ? "Saving Changes..." : "Save Profile"}
-                            </button>
+                        <div className="bg-indigo-700 rounded-2xl p-6 text-white shadow-lg shadow-indigo-200">
+                            <h3 className="text-sm font-black uppercase tracking-widest mb-2 flex items-center gap-2">
+                                <AlertCircle className="h-4 w-4" />
+                                Pro Tip
+                            </h3>
+                            <p className="text-xs text-indigo-100 leading-relaxed font-medium">
+                                Keep your profile updated to build trust with {user?.role === 'VENDOR' ? 'clients' : 'vendors'}. A complete profile increases your chances of successful bookings by 40%.
+                            </p>
                         </div>
-                    </form>
+                    </div>
+
+                    {/* RIGHT COLUMN: Form Details */}
+                    <div className="flex-1 w-full space-y-8">
+                        <header className="hidden lg:block">
+                            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Profile Settings</h1>
+                            <p className="text-sm text-slate-500 mt-1 font-medium">Manage your personal and professional information.</p>
+                        </header>
+
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                            {/* Basic Information Section */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+                            >
+                                <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+                                    <div className="h-2 w-2 rounded-full bg-indigo-600"></div>
+                                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Personal Details</h2>
+                                </div>
+                                
+                                <div className="p-6 space-y-5">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">Display Name</label>
+                                            <div className="relative group">
+                                                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+                                                <input
+                                                    type="text"
+                                                    {...register("name", { 
+                                                        required: "Full name is required",
+                                                        minLength: { value: 3, message: "Name must be at least 3 characters" }
+                                                    })}
+                                                    placeholder="Your name"
+                                                    className={`w-full pl-11 pr-4 py-3 text-sm bg-slate-50 border ${errors.name ? 'border-red-400 focus:ring-red-100' : 'border-slate-100 focus:ring-indigo-100'} rounded-xl focus:bg-white focus:ring-4 focus:border-indigo-600 outline-none transition-all text-slate-800 font-bold`}
+                                                />
+                                            </div>
+                                            {errors.name && <p className="text-[10px] text-red-500 mt-1 font-bold flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {errors.name.message}</p>}
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">Phone Number</label>
+                                            <div className="relative group">
+                                                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+                                                <input
+                                                    type="text"
+                                                    {...register("phone", {
+                                                        pattern: { value: /^[0-9+\s()-]{10,15}$/, message: "Invalid phone number" }
+                                                    })}
+                                                    placeholder="+92 XXX XXXXXXX"
+                                                    className={`w-full pl-11 pr-4 py-3 text-sm bg-slate-50 border ${errors.phone ? 'border-red-400 focus:ring-red-100' : 'border-slate-100 focus:ring-indigo-100'} rounded-xl focus:bg-white focus:ring-4 focus:border-indigo-600 outline-none transition-all text-slate-800 font-bold`}
+                                                />
+                                            </div>
+                                            {errors.phone && <p className="text-[10px] text-red-500 mt-1 font-bold flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {errors.phone.message}</p>}
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+
+                            {/* Professional Information Section (Vendors) */}
+                            {vendorProfile && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                    className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+                                >
+                                    <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-2 w-2 rounded-full bg-indigo-600"></div>
+                                            <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Business Information</h2>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-6 space-y-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-1.5">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">City / Location</label>
+                                                <div className="relative group">
+                                                    <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+                                                    <input
+                                                        type="text"
+                                                        {...register("city", { required: "City is required" })}
+                                                        placeholder="e.g. Lahore"
+                                                        className={`w-full pl-11 pr-4 py-3 text-sm bg-slate-50 border ${errors.city ? 'border-red-400 focus:ring-red-100' : 'border-slate-100 focus:ring-indigo-100'} rounded-xl focus:bg-white focus:ring-4 focus:border-indigo-600 outline-none transition-all text-slate-800 font-bold`}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-1.5">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">Business Contact</label>
+                                                <div className="relative group">
+                                                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+                                                    <input
+                                                        type="text"
+                                                        {...register("business_phone")}
+                                                        placeholder="Public business phone"
+                                                        className="w-full pl-11 pr-4 py-3 text-sm bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 outline-none transition-all text-slate-800 font-bold"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-1.5">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">Years of Experience</label>
+                                                <div className="relative group">
+                                                    <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+                                                    <input
+                                                        type="number"
+                                                        {...register("experience_years")}
+                                                        className="w-full pl-11 pr-4 py-3 text-sm bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 outline-none transition-all text-slate-800 font-bold"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-1.5">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">Verification Status</label>
+                                                <div className="relative opacity-60">
+                                                    <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                                    <input
+                                                        type="text"
+                                                        value={vendorProfile.cnic ? "Verified Identity" : "Pending Verification"}
+                                                        disabled
+                                                        className="w-full pl-11 pr-4 py-3 text-sm bg-slate-100 border border-slate-200 rounded-xl cursor-not-allowed font-bold text-slate-600"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">About your Business</label>
+                                            <textarea
+                                                {...register("description")}
+                                                rows={4}
+                                                placeholder="Describe your expertise and services..."
+                                                className="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 outline-none transition-all text-slate-800 font-bold resize-none"
+                                            />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* Services List (Vendors) */}
+                            {vendorProfile && vendorProfile.services && vendorProfile.services.length > 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+                                >
+                                    <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+                                        <div className="h-2 w-2 rounded-full bg-green-600"></div>
+                                        <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Active Services</h2>
+                                    </div>
+                                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50/30">
+                                        {vendorProfile.services.map((service: any) => (
+                                            <div key={service.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <h3 className="font-black text-slate-900 text-sm group-hover:text-indigo-700 transition-colors uppercase tracking-tight">{service.title}</h3>
+                                                    <Wrench className="h-3.5 w-3.5 text-slate-300" />
+                                                </div>
+                                                <p className="text-indigo-700 font-black text-xs bg-indigo-50 w-fit px-2 py-1 rounded-lg">Rs. {service.price}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* Form Actions */}
+                            <div className="pt-4 flex items-center justify-between">
+                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                                    Last Sync: {new Date().toLocaleTimeString()}
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={saving}
+                                    className="bg-indigo-700 hover:bg-indigo-800 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-indigo-200 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-70 flex items-center justify-center gap-3 text-xs uppercase tracking-widest"
+                                >
+                                    {saving ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <Save className="w-4 h-4" />
+                                    )}
+                                    {saving ? "Processing..." : "Commit Changes"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </main>
         </div>

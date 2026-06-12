@@ -100,16 +100,18 @@ export class AuthService {
       role: user.role,
       vendorStatus,
       vendorType: user.vendor_profile?.vendor_type,
+      profile_photo: user.profile_photo,
     };
   }
 
   // --- UPDATE PROFILE ---
-  async updateProfile(userId: string, data: { name?: string; phone?: string }) {
+  async updateProfile(userId: string, data: { name?: string; phone?: string; profile_photo?: string }) {
     const user = await this.prisma.user.update({
       where: { id: userId },
       data: {
         name: data.name,
         phone: data.phone,
+        profile_photo: data.profile_photo,
       },
     });
 
@@ -119,6 +121,7 @@ export class AuthService {
       email: user.email,
       phone: user.phone,
       role: user.role,
+      profile_photo: user.profile_photo,
     };
   }
 }

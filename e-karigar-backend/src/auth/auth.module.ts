@@ -4,10 +4,12 @@ import { AuthController } from './auth.controller';
 import { PrismaService } from '../prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
   imports: [
     PassportModule,
+    CloudinaryModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET, // In production, use .env
       signOptions: { expiresIn: '1d' }, // Token valid for 1 day

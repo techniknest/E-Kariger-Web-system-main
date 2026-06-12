@@ -32,7 +32,21 @@ export const authApi = {
     const response = await api.get("/auth/me");
     return response.data;
   },
-  updateProfile: async (data: { name?: string; phone?: string }) => {
+  updateProfile: async (data: { name?: string; phone?: string; profilePhoto?: File }) => {
+    if (data.profilePhoto) {
+      const formData = new FormData();
+      if (data.name) formData.append("name", data.name);
+      if (data.phone) formData.append("phone", data.phone);
+      formData.append("profilePhoto", data.profilePhoto);
+
+      const response = await api.patch("/auth/profile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data;
+    }
+
     const response = await api.patch("/auth/profile", data);
     return response.data;
   },
@@ -116,6 +130,52 @@ export const reviewsApi = {
   },
   getMyRating: async () => {
     const response = await api.get("/reviews/my-rating");
+    return response.data;
+  },
+};
+
+export const adminApi = {
+  getVendorDetails: async (id: string) => {
+    const response = await api.get(`/admin/vendors/${id}`);
+    return response.data;
+  },
+  getVendorBookingsAdmin: async (id: string) => {
+    const response = await api.get(`/admin/vendors/${id}/bookings`);
+    return response.data;
+  },
+  approveVendor: async (id: string) => {
+    const response = await api.patch(`/admin/vendors/${id}/approve`);
+    return response.data;
+  },
+  rejectVendor: async (id: string) => {
+    const response = await api.patch(`/admin/vendors/${id}/reject`);
+    return response.data;
+  },
+  suspendVendor: async (id: string) => {
+    const response = await api.patch(`/admin/vendors/${id}/suspend`);
+    return response.data;
+  },
+  getSuspendedVendors: async () => {
+    const response = await api.get("/admin/vendors/suspended");
+    return response.data;
+  },
+  deleteVendor: async (id: string) => {
+    const response = await api.delete(`/admin/vendors/${id}`);
+    return response.data;
+  },
+};
+
+export const notificationsApi = {
+  getAll: async () => {
+    const response = await api.get("/notifications");
+    return response.data;
+  },
+  markAsRead: async (id: string) => {
+    const response = await api.patch(`/notifications/${id}/read`);
+    return response.data;
+  },
+  markAllAsRead: async () => {
+    const response = await api.patch("/notifications/read-all");
     return response.data;
   },
 };

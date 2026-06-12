@@ -96,7 +96,7 @@ const ReviewModal = ({ bookingId, serviceName, vendorName, onClose }: ReviewModa
                             onChange={(e) => setComment(e.target.value)}
                             placeholder="Tell us about your experience..."
                             rows={3}
-                            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none resize-none transition bg-slate-50"
+                            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none resize-none transition bg-slate-50"
                         />
                     </div>
                 </div>
@@ -112,7 +112,7 @@ const ReviewModal = ({ bookingId, serviceName, vendorName, onClose }: ReviewModa
                     <button
                         onClick={handleSubmit}
                         disabled={mutation.isPending || rating === 0}
-                        className="px-5 py-2 bg-blue-700 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition disabled:opacity-50 flex items-center gap-2"
+                        className="px-5 py-2 bg-indigo-700 text-white text-sm font-medium rounded-lg hover:bg-indigo-800 transition disabled:opacity-50 flex items-center gap-2"
                     >
                         {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                         Submit Review

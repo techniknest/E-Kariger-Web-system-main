@@ -127,10 +127,10 @@ const JobRequestManager = () => {
   const getStatusBadge = (status: string) => {
     const config: Record<string, { bg: string; text: string; label: string; icon?: React.ReactNode }> = {
       PENDING: { bg: "bg-amber-50 border-amber-200", text: "text-amber-700", label: "Pending" },
-      ACCEPTED: { bg: "bg-blue-50 border-blue-200", text: "text-blue-700", label: "Accepted" },
-      IN_PROGRESS: { bg: "bg-blue-50 border-blue-200", text: "text-blue-700", label: "In Progress", icon: <Play className="h-3 w-3" /> },
+      ACCEPTED: { bg: "bg-indigo-50 border-indigo-200", text: "text-indigo-700", label: "Accepted" },
+      IN_PROGRESS: { bg: "bg-indigo-50 border-indigo-200", text: "text-indigo-700", label: "In Progress", icon: <Play className="h-3 w-3" /> },
       WAITING_APPROVAL: { bg: "bg-orange-50 border-orange-200", text: "text-orange-700", label: "Awaiting Client", icon: <Clock className="h-3 w-3" /> },
-      COMPLETED: { bg: "bg-emerald-50 border-emerald-200", text: "text-emerald-700", label: "Completed", icon: <CheckCircle className="h-3 w-3" /> },
+      COMPLETED: { bg: "bg-green-50 border-green-200", text: "text-green-700", label: "Completed", icon: <CheckCircle className="h-3 w-3" /> },
       REJECTED: { bg: "bg-red-50 border-red-200", text: "text-red-700", label: "Rejected" },
       CANCELLED: { bg: "bg-slate-100 border-slate-200", text: "text-slate-600", label: "Cancelled", icon: <XCircle className="h-3 w-3" /> },
     };
@@ -147,7 +147,7 @@ const JobRequestManager = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 text-blue-700 animate-spin" />
+        <Loader2 className="h-6 w-6 text-indigo-700 animate-spin" />
       </div>
     );
   }
@@ -182,7 +182,7 @@ const JobRequestManager = () => {
           >
             {tab.label}
             {tab.count > 0 && (
-              <span className={`ml-1.5 text-[10px] font-bold ${activeTab === tab.key ? "text-blue-700" : "text-slate-400"}`}>
+              <span className={`ml-1.5 text-[10px] font-bold ${activeTab === tab.key ? "text-indigo-700" : "text-slate-400"}`}>
                 {tab.count}
               </span>
             )}
@@ -198,7 +198,7 @@ const JobRequestManager = () => {
             <div className="p-4 border-b border-slate-100">
               <div className="flex justify-between items-start mb-2">
                 <div className="p-1.5 bg-slate-50 rounded-lg border border-slate-100">
-                  <Briefcase className="h-4 w-4 text-blue-700" />
+                  <Briefcase className="h-4 w-4 text-indigo-700" />
                 </div>
                 {getStatusBadge(booking.status)}
               </div>
@@ -274,7 +274,7 @@ const JobRequestManager = () => {
                   <button
                     onClick={() => handleStatusUpdate(booking.id, "ACCEPTED")}
                     disabled={statusMutation.isPending}
-                    className="flex-1 py-2 px-3 rounded-lg bg-blue-700 text-white hover:bg-blue-800 font-medium text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                    className="flex-1 py-2 px-3 rounded-lg bg-indigo-700 text-white hover:bg-indigo-800 font-medium text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm"
                   >
                     {statusMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                     Accept
@@ -286,7 +286,7 @@ const JobRequestManager = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => { setOtpModal(booking.id); setOtpValue(""); setOtpError(""); }}
-                    className="flex-1 py-2 px-3 rounded-lg bg-blue-700 text-white hover:bg-blue-800 font-medium text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                    className="flex-1 py-2 px-3 rounded-lg bg-indigo-700 text-white hover:bg-indigo-800 font-medium text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm"
                   >
                     <Play className="h-3.5 w-3.5" /> Enter OTP to Start
                   </button>
@@ -304,7 +304,7 @@ const JobRequestManager = () => {
                   <button
                     onClick={() => handleStatusUpdate(booking.id, "COMPLETED")}
                     disabled={statusMutation.isPending}
-                    className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-medium text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                    className="flex-1 py-2 px-3 rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm"
                   >
                     {statusMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
                     Mark Completed
@@ -378,7 +378,7 @@ const JobRequestManager = () => {
                       prev?.focus();
                     }
                   }}
-                  className="h-12 w-12 text-center text-xl font-bold border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                  className="h-12 w-12 text-center text-xl font-bold border-2 border-slate-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
                 />
               ))}
             </div>
@@ -386,7 +386,7 @@ const JobRequestManager = () => {
             <button
               onClick={() => handleStartJob(otpModal)}
               disabled={startJobMutation.isPending || otpValue.length !== 4}
-              className="w-full py-2.5 bg-blue-700 text-white rounded-lg text-xs font-bold hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-indigo-700 text-white rounded-lg text-xs font-bold hover:bg-indigo-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {startJobMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
               Start Job
@@ -415,7 +415,7 @@ const JobRequestManager = () => {
                   value={newPrice}
                   onChange={(e) => setNewPrice(e.target.value)}
                   placeholder="Enter new price"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
                 />
               </div>
               <div>
@@ -425,7 +425,7 @@ const JobRequestManager = () => {
                   onChange={(e) => setReviseReason(e.target.value)}
                   placeholder="Explain why the price changed..."
                   rows={3}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all resize-none"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all resize-none"
                 />
               </div>
             </div>

@@ -15,6 +15,8 @@ import {
   AlertTriangle,
   XCircle,
   ShieldCheck,
+  ChevronRight,
+  Star,
 } from "lucide-react";
 import AdminDashboard from "../components/AdminDashboard";
 import VendorDashboard from "../components/VendorDashboard";
@@ -40,17 +42,17 @@ interface Booking {
 // ─── Status Badge Component ────────────────────────────────────
 const StatusBadge = ({ status }: { status: string }) => {
   const config: Record<string, { bg: string; text: string; label: string; icon?: React.ReactNode }> = {
-    PENDING: { bg: "bg-yellow-50", text: "text-yellow-700", label: "Pending" },
-    ACCEPTED: { bg: "bg-blue-50", text: "text-blue-700", label: "Accepted" },
-    IN_PROGRESS: { bg: "bg-indigo-50", text: "text-indigo-700", label: "In Progress", icon: <Play className="h-3 w-3" /> },
-    WAITING_APPROVAL: { bg: "bg-orange-50", text: "text-orange-700", label: "Price Revised", icon: <AlertTriangle className="h-3 w-3" /> },
-    COMPLETED: { bg: "bg-green-50", text: "text-green-700", label: "Completed", icon: <CheckCircle className="h-3 w-3" /> },
-    REJECTED: { bg: "bg-red-50", text: "text-red-700", label: "Rejected" },
-    CANCELLED: { bg: "bg-slate-100", text: "text-slate-600", label: "Cancelled", icon: <XCircle className="h-3 w-3" /> },
+    PENDING: { bg: "bg-amber-50 border-amber-200", text: "text-amber-700", label: "Pending" },
+    ACCEPTED: { bg: "bg-indigo-50 border-indigo-200", text: "text-indigo-700", label: "Accepted" },
+    IN_PROGRESS: { bg: "bg-indigo-50 border-indigo-200", text: "text-indigo-700", label: "In Progress", icon: <Play className="h-3 w-3" /> },
+    WAITING_APPROVAL: { bg: "bg-orange-50 border-orange-200", text: "text-orange-700", label: "Price Revised", icon: <AlertTriangle className="h-3 w-3" /> },
+    COMPLETED: { bg: "bg-green-50 border-green-200", text: "text-green-700", label: "Completed", icon: <CheckCircle className="h-3 w-3" /> },
+    REJECTED: { bg: "bg-red-50 border-red-200", text: "text-red-700", label: "Rejected" },
+    CANCELLED: { bg: "bg-slate-100 border-slate-200", text: "text-slate-600", label: "Cancelled", icon: <XCircle className="h-3 w-3" /> },
   };
-  const c = config[status] || { bg: "bg-slate-100", text: "text-slate-600", label: status };
+  const c = config[status] || { bg: "bg-slate-100 border-slate-200", text: "text-slate-600", label: status };
   return (
-    <span className={`${c.bg} ${c.text} px-2.5 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1`}>
+    <span className={`${c.bg} ${c.text} border px-2.5 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 uppercase tracking-wider`}>
       {c.icon}
       {c.label}
     </span>
@@ -68,105 +70,124 @@ const BookingCard = ({ booking, onApprove, onReject, actionLoading, onRate }: {
   const displayPrice = booking.is_price_revised ? booking.final_price : booking.total_price;
 
   return (
-    <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
+    <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all flex flex-col gap-5">
       {/* Top Row: Status + Booking ID */}
       <div className="flex items-center justify-between">
         <StatusBadge status={booking.status} />
-        <span className="text-xs text-slate-400 font-mono">#{booking.id.slice(0, 8)}</span>
+        <span className="text-[11px] text-slate-400 font-mono font-medium uppercase tracking-widest">Job #{booking.id.slice(0, 8)}</span>
       </div>
 
       {/* Middle Row: Details */}
-      <div className="flex gap-4">
-        {/* Thumbnail */}
-        <div className="w-24 h-16 rounded-lg bg-gray-100 overflow-hidden shrink-0">
-          <img
-            src={`https://source.unsplash.com/random/200x130/?repair,service&sig=${booking.service.id}`}
-            alt={booking.service.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-bold text-slate-900 truncate">{booking.service.title}</h4>
-          <p className="text-xs text-slate-500 mt-0.5">By {booking.vendor?.user?.name || "Unknown Vendor"}</p>
-          <div className="flex items-center gap-4 mt-2">
-            <span className="text-xs text-slate-500 flex items-center gap-1">
-              <Calendar className="h-3 w-3 text-slate-400" />
-              {new Date(booking.scheduled_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-              {", "}
-              {new Date(booking.scheduled_date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-            </span>
-            <span className="text-xs text-slate-500 flex items-center gap-1">
-              <MapPin className="h-3 w-3 text-slate-400" />
-              <span className="truncate max-w-[120px]">{booking.address}</span>
-            </span>
+      <div className="flex flex-col sm:flex-row gap-5">
+        <div className="flex-1 min-w-0 space-y-3">
+          <div>
+            <h4 className="text-base font-bold text-slate-900 tracking-tight leading-snug">{booking.service.title}</h4>
+            <p className="text-xs text-slate-500 mt-0.5 font-medium">Provided by <span className="text-indigo-700">{booking.vendor?.user?.name || "Professional"}</span></p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex items-center gap-2 text-xs text-slate-600">
+              <div className="p-1.5 bg-slate-50 rounded-lg border border-slate-100">
+                <Calendar className="h-3.5 w-3.5 text-slate-400" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-0.5">Date & Time</p>
+                <p className="font-semibold">{new Date(booking.scheduled_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(booking.scheduled_date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-slate-600">
+              <div className="p-1.5 bg-slate-50 rounded-lg border border-slate-100">
+                <MapPin className="h-3.5 w-3.5 text-slate-400" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-0.5">Location</p>
+                <p className="font-semibold truncate">{booking.address}</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Price */}
-        <div className="text-right shrink-0">
-          <p className="text-[10px] text-slate-500 uppercase font-semibold tracking-wider">Total</p>
-          <p className="text-lg font-bold text-slate-900">Rs. {displayPrice}</p>
+        {/* Price Card */}
+        <div className="sm:w-32 bg-slate-50 border border-slate-100 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+          <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Fee</p>
+          <p className="text-lg font-black text-slate-900 leading-none">Rs. {Number(displayPrice).toLocaleString()}</p>
           {booking.is_price_revised && (
-            <p className="text-[10px] text-slate-400 line-through">Rs. {booking.total_price}</p>
+            <p className="text-[10px] text-slate-400 line-through font-medium mt-1">Rs. {Number(booking.total_price).toLocaleString()}</p>
           )}
         </div>
       </div>
 
-      {/* Bottom Row: OTP / Approval / Rate */}
-      {booking.status === 'ACCEPTED' && booking.start_otp && (
-        <div className="flex items-center gap-3 bg-slate-50 border border-dashed border-slate-300 px-4 py-2.5 rounded-lg">
-          <ShieldCheck className="h-4 w-4 text-blue-700 shrink-0" />
-          <div className="flex-1">
-            <p className="text-xs text-slate-600 font-medium">Share with vendor when they arrive</p>
+      {/* Bottom Row: Actions / Info */}
+      <div className="pt-2">
+        {booking.status === 'ACCEPTED' && booking.start_otp && (
+          <div className="flex items-center gap-4 bg-indigo-50 border border-indigo-100 p-4 rounded-xl shadow-inner">
+            <div className="p-2 bg-white rounded-lg shadow-sm">
+                <ShieldCheck className="h-5 w-5 text-indigo-700" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs text-indigo-800 font-bold uppercase tracking-wide">Start Code</p>
+              <p className="text-[10px] text-indigo-600 font-medium">Share this OTP with the vendor to begin the job</p>
+            </div>
+            <span className="font-mono text-2xl font-black tracking-[0.3em] text-indigo-800 pr-2">
+              {booking.start_otp}
+            </span>
           </div>
-          <span className="font-mono text-lg font-bold tracking-widest text-slate-900">
-            {booking.start_otp}
-          </span>
-        </div>
-      )}
+        )}
 
-      {booking.status === 'WAITING_APPROVAL' && (
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 space-y-2.5">
-          <p className="text-xs text-orange-800">
-            Vendor updated price to <span className="font-bold">Rs. {booking.final_price}</span>
-            {booking.revision_reason && <> — <span className="italic">{booking.revision_reason}</span></>}
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => onApprove?.(booking.id)}
-              disabled={actionLoading}
-              className="px-3 py-1.5 bg-green-600 text-white rounded-md text-xs font-semibold hover:bg-green-700 transition-colors disabled:opacity-50"
-            >
-              Approve
-            </button>
-            <button
-              onClick={() => onReject?.(booking.id)}
-              disabled={actionLoading}
-              className="px-3 py-1.5 bg-white text-red-600 border border-red-200 rounded-md text-xs font-semibold hover:bg-red-50 transition-colors disabled:opacity-50"
-            >
-              Reject & Cancel
-            </button>
+        {booking.status === 'WAITING_APPROVAL' && (
+          <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 space-y-4">
+            <div className="flex items-start gap-3">
+                <div className="p-2 bg-white rounded-lg border border-orange-100">
+                    <AlertTriangle className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                    <h5 className="text-sm font-bold text-orange-900">Price Revision Request</h5>
+                    <p className="text-xs text-orange-700 mt-0.5 leading-relaxed">
+                        The vendor has updated the price to <span className="font-bold">Rs. {booking.final_price}</span>. 
+                        {booking.revision_reason && <> Reason: <span className="font-medium italic">"{booking.revision_reason}"</span></>}
+                    </p>
+                </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => onApprove?.(booking.id)}
+                disabled={actionLoading}
+                className="flex-1 py-2.5 bg-indigo-700 text-white rounded-lg text-xs font-bold hover:bg-indigo-800 shadow-lg shadow-indigo-100 transition-all disabled:opacity-50"
+              >
+                Approve New Price
+              </button>
+              <button
+                onClick={() => onReject?.(booking.id)}
+                disabled={actionLoading}
+                className="py-2.5 px-6 bg-white text-red-600 border border-red-200 rounded-lg text-xs font-bold hover:bg-red-50 transition-all disabled:opacity-50"
+              >
+                Cancel Job
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {booking.status === 'COMPLETED' && (
-        booking.review ? (
-          <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium">
-            <CheckCircle className="h-4 w-4" />
-            Reviewed — {booking.review.rating}/5 stars
+        {booking.status === 'COMPLETED' && (
+          <div className="flex items-center justify-between py-1 px-1">
+            {booking.review ? (
+              <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-lg border border-green-100 text-xs font-bold uppercase tracking-wide">
+                <CheckCircle className="h-4 w-4" />
+                Rated {booking.review.rating}/5 stars
+              </div>
+            ) : (
+                <div className="flex items-center gap-4">
+                     <p className="text-xs text-slate-500 font-medium italic">Service complete! How was your experience?</p>
+                     <button
+                        onClick={() => onRate?.(booking)}
+                        className="bg-indigo-700 text-white px-5 py-2 rounded-lg text-xs font-bold hover:bg-indigo-800 transition-all flex items-center gap-2 shadow-md shadow-indigo-100"
+                    >
+                        <Star className="h-3.5 w-3.5 fill-white" /> Rate Now
+                    </button>
+                </div>
+            )}
           </div>
-        ) : (
-          <button
-            onClick={() => onRate?.(booking)}
-            className="text-blue-700 text-sm font-medium hover:underline text-left flex items-center gap-1"
-          >
-            ⭐ Rate Service
-          </button>
-        )
-      )}
+        )}
+      </div>
     </div>
   );
 };
@@ -191,11 +212,12 @@ const DashboardPage = () => {
 
   const isAdmin = user.role === "ADMIN";
   const isApprovedVendor = user.vendorStatus === "APPROVED";
+  const isSuspendedVendor = user.vendorStatus === "SUSPENDED";
   const isPendingVendor = user.vendorStatus === "PENDING";
   const isRejectedVendor = user.vendorStatus === "REJECTED";
-  const isClient = user.role === "CLIENT" && user.vendorStatus === "NONE";
+  const isClient = user.role === "CLIENT" && (user.vendorStatus === "NONE" || !user.vendorStatus);
 
-  // React Query: fetch client bookings with 5s polling
+  // React Query: fetch client bookings
   const { data: bookings = [], isLoading: loadingBookings } = useQuery<Booking[]>({
     queryKey: ['clientBookings'],
     queryFn: () => bookingsApi.getClientBookings(),
@@ -209,7 +231,7 @@ const DashboardPage = () => {
   useEffect(() => {
     if (isAdmin && !location.pathname.startsWith("/admin")) {
       navigate("/admin", { replace: true });
-    } else if (isApprovedVendor && !location.pathname.startsWith("/vendor")) {
+    } else if ((isApprovedVendor || isSuspendedVendor) && !location.pathname.startsWith("/vendor")) {
       navigate("/vendor/dashboard", { replace: true });
     } else if ((isClient || isPendingVendor || isRejectedVendor) && !location.pathname.startsWith("/client")) {
       navigate("/client/dashboard", { replace: true });
@@ -240,73 +262,77 @@ const DashboardPage = () => {
   const activeStatuses = ['PENDING', 'ACCEPTED', 'IN_PROGRESS', 'WAITING_APPROVAL'];
   const filteredBookings = bookings.filter(b => activeStatuses.includes(b.status));
 
-  // ─── Admin & Vendor Views (unchanged) ─────────────────────────
+  // ─── Admin & Vendor Views (delegated) ─────────────────────────
   if (isAdmin) return <AdminDashboard />;
-  if (isApprovedVendor) return <VendorDashboard />;
+  if (isApprovedVendor || isSuspendedVendor) return <VendorDashboard />;
 
   // ─── Client View ──────────────────────────────────────────────
   return (
-    <>
-      <div className="space-y-6">
+    <div className="font-['Open Sans',_sans-serif]" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+      <div className="space-y-8 animate-in fade-in duration-500">
         {/* Header */}
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">My Dashboard</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Welcome back, <span className="font-medium">{user.name}</span>.</p>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 leading-tight">Client Hub</h1>
+            <p className="text-slate-500 text-sm mt-1">Hello <span className="font-bold text-slate-700">{user.name}</span>, here's what's happening today.</p>
           </div>
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 px-4 py-2 text-blue-700 font-medium text-sm border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+            className="flex items-center gap-2 px-6 py-2.5 text-indigo-700 font-bold text-sm bg-white border border-indigo-100 rounded-xl hover:bg-indigo-50 transition-all shadow-sm"
           >
             <Home className="h-4 w-4" />
-            Browse Services
+            Find Services
+            <ChevronRight className="h-4 w-4 text-indigo-300" />
           </button>
         </div>
 
         {/* Status Banners */}
         {isPendingVendor && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-5 flex items-start gap-3">
-            <Clock className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 flex items-start gap-4 shadow-sm">
+            <div className="p-3 bg-white rounded-xl shadow-sm border border-amber-100">
+                <Clock className="h-6 w-6 text-amber-600 shrink-0" />
+            </div>
             <div>
-              <h3 className="font-bold text-yellow-800 text-sm">Seller Application Under Review</h3>
-              <p className="text-yellow-700 text-xs mt-0.5">Our team is reviewing your application. This usually takes 24-48 hours.</p>
+              <h3 className="font-black text-amber-900 text-sm uppercase tracking-wide">Application Pending Review</h3>
+              <p className="text-amber-700 text-xs mt-1 font-medium italic">Our on-boarding team is verifying your professional credentials. This typically takes 24 hours.</p>
             </div>
           </div>
         )}
 
         {isRejectedVendor && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-5 flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 flex items-start gap-4 shadow-sm">
+             <div className="p-3 bg-white rounded-xl shadow-sm border border-red-100">
+                <AlertCircle className="h-6 w-6 text-red-600 shrink-0" />
+             </div>
             <div>
-              <h3 className="font-bold text-red-800 text-sm">Application Not Approved</h3>
-              <p className="text-red-700 text-xs mt-0.5">Your seller application was not approved. Please contact support.</p>
+              <h3 className="font-black text-red-900 text-sm uppercase tracking-wide">Application Status: Rejected</h3>
+              <p className="text-red-700 text-xs mt-1 font-medium italic">Your application didn't meet our platform standards. Contact support for more details.</p>
             </div>
           </div>
         )}
 
         {/* Become a Vendor CTA */}
         {isClient && (
-          <div className="bg-gradient-to-r from-blue-700 to-slate-900 rounded-2xl p-6 text-white overflow-hidden relative">
-            {/* Background decoration */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-white/5"></div>
-              <div className="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-white/5"></div>
-              <Briefcase className="absolute right-8 top-1/2 -translate-y-1/2 h-24 w-24 text-white/[0.06]" />
-            </div>
+          <div className="bg-slate-900 rounded-[2rem] p-8 text-white overflow-hidden relative shadow-2xl">
+            {/* Design patterns */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600 rounded-full blur-[100px] opacity-20 -mr-32 -mt-32"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500 rounded-full blur-[80px] opacity-20 -ml-16 -mb-16"></div>
 
-            <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-bold mb-1">Are you a Skilled Professional?</h3>
-                <p className="text-blue-200 text-sm max-w-md">
-                  Join E-Karigar and grow your income. List your services, find local clients,
-                  and start earning. It takes just 2 minutes.
+            <div className="relative flex flex-col lg:flex-row items-center justify-between gap-8">
+              <div className="text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 border border-indigo-500/20">
+                    Growth Opportunity
+                </div>
+                <h3 className="text-2xl font-black mb-2 tracking-tight">Turn your Skills into a Business</h3>
+                <p className="text-slate-400 text-sm max-w-lg leading-relaxed font-medium">
+                  Join thousands of local professionals earning through E-Karigar. List your talent, manage your schedule, and get paid securely.
                 </p>
               </div>
               <button
                 onClick={() => navigate("/become-vendor")}
-                className="bg-white text-blue-700 px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-blue-50 transition shadow-lg whitespace-nowrap flex items-center gap-2"
+                className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black text-sm hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-900/40 whitespace-nowrap flex items-center gap-3 active:scale-95"
               >
-                Become a Vendor
+                Launch Professional Profile
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
@@ -315,30 +341,41 @@ const DashboardPage = () => {
 
         {/* Bookings Section */}
         <div>
-          <h2 className="text-lg font-bold text-slate-900 border-b border-gray-200 pb-3 mb-5">
-            Active Bookings
-          </h2>
+          <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-8">
+              <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
+                Active Bookings
+              </h2>
+              {filteredBookings.length > 0 && (
+                  <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                    {filteredBookings.length} Total
+                  </span>
+              )}
+          </div>
 
           {/* Content */}
           {loadingBookings ? (
-            <div className="flex justify-center py-16">
-              <Loader2 className="h-6 w-6 text-blue-700 animate-spin" />
+            <div className="flex flex-col items-center justify-center py-24">
+              <Loader2 className="h-8 w-8 text-indigo-700 animate-spin" />
+              <p className="text-xs font-bold text-slate-400 mt-4 uppercase tracking-widest">Updating data...</p>
             </div>
           ) : filteredBookings.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-              <Calendar className="h-10 w-10 mx-auto text-slate-300 mb-3" />
-              <p className="text-sm text-slate-500 font-medium">
-                No active bookings
+            <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-200">
+               <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 mx-auto border border-slate-100">
+                  <Calendar className="h-8 w-8 text-slate-200" />
+               </div>
+              <p className="text-sm text-slate-500 font-bold mb-1">
+                Zero Active Bookings
               </p>
+              <p className="text-xs text-slate-400 mb-8 font-medium italic">You haven't booked any services yet.</p>
               <button
                 onClick={() => navigate("/")}
-                className="mt-3 px-5 py-2 bg-blue-700 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition"
+                className="px-8 py-3 bg-indigo-700 text-white rounded-xl text-sm font-black hover:bg-indigo-800 transition-all shadow-lg shadow-indigo-100"
               >
-                Browse Services
+                Browse Our Services
               </button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredBookings.map((booking) => (
                 <BookingCard
                   key={booking.id}
@@ -358,11 +395,11 @@ const DashboardPage = () => {
         <ReviewModal
           bookingId={reviewBooking.id}
           serviceName={reviewBooking.service.title}
-          vendorName={reviewBooking.vendor?.user?.name || 'Vendor'}
+          vendorName={reviewBooking.vendor?.user?.name || 'Professional'}
           onClose={() => setReviewBooking(null)}
         />
       )}
-    </>
+    </div>
   );
 };
 
