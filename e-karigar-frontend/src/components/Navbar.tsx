@@ -170,36 +170,39 @@ const Navbar = ({ simple = false }: NavbarProps) => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
                 <div className="flex justify-between items-center h-full">
 
-                    {/* Section A: Brand */}
-                    <Link to="/" className="flex items-center gap-2 group">
-                        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200 group-hover:scale-105 transition-transform">
-                            <span className="text-white font-bold text-lg ">E</span>
-                        </div>
-                        <span className="text-xl font-bold tracking-tight text-slate-800 group-hover:text-indigo-600 transition-colors uppercase ">
-                            -Karigar
-                        </span>
-                    </Link>
+                    {/* Left Side: Brand and Nav Links */}
+                    <div className="flex items-center gap-8 lg:gap-16 h-full">
+                        {/* Section A: Brand */}
+                        <Link to="/" className="flex items-center gap-2 group">
+                            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200 group-hover:scale-105 transition-transform">
+                                <span className="text-white font-bold text-lg ">E</span>
+                            </div>
+                            <span className="text-xl font-bold tracking-tight text-slate-800 group-hover:text-indigo-600 transition-colors uppercase ">
+                                -Karigar
+                            </span>
+                        </Link>
 
-                    {/* Section B: Navigation Links (Center) - Hidden on Mobile & if simple is true */}
-                    {!simple && (
-                        <nav className="hidden md:flex items-center gap-8 h-full">
-                            {navLinks.map((link) => (
-                                <NavLink
-                                    key={link.name}
-                                    to={link.path}
-                                    className={({ isActive }) =>
-                                        `flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest h-full border-b-2 transition-all duration-200 ${isActive
-                                            ? "border-indigo-600 text-indigo-700 pb-1"
-                                            : "border-transparent text-slate-500 hover:text-indigo-600 hover:border-indigo-200"
-                                        }`
-                                    }
-                                >
-                                    {link.name}
-                                    {link.hasDropdown && <ChevronDown className="h-3 w-3 mt-0.5" />}
-                                </NavLink>
-                            ))}
-                        </nav>
-                    )}
+                        {/* Section B: Navigation Links (Center) - Hidden on Mobile & if simple is true */}
+                        {!simple && (
+                            <nav className="hidden md:flex items-center gap-6 lg:gap-8 h-full">
+                                {navLinks.map((link) => (
+                                    <NavLink
+                                        key={link.name}
+                                        to={link.path}
+                                        className={({ isActive }) =>
+                                            `flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest h-full border-b-2 transition-all duration-200 ${isActive
+                                                ? "border-indigo-600 text-indigo-700 pb-1"
+                                                : "border-transparent text-slate-500 hover:text-indigo-600 hover:border-indigo-200"
+                                            }`
+                                        }
+                                    >
+                                        {link.name}
+                                        {link.hasDropdown && <ChevronDown className="h-3 w-3 mt-0.5" />}
+                                    </NavLink>
+                                ))}
+                            </nav>
+                        )}
+                    </div>
 
                     {/* Section C: Utilities (Right) - Hidden on Mobile & if simple is true */}
                     {!simple && (

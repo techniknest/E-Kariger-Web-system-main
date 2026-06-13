@@ -268,7 +268,7 @@ const DashboardPage = () => {
 
   // ─── Client View ──────────────────────────────────────────────
   return (
-    <div className="font-['Open Sans',_sans-serif]" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+    <div className="font-sans">
       <div className="space-y-8 animate-in fade-in duration-500">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

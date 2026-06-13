@@ -103,7 +103,7 @@ const ServiceDetailsPage = () => {
                     scheduledDate: scheduledDate,
                     problemDescription: problemDescription || "Standard Booking via Service Page",
                     address: address,
-                    totalPrice: service.price
+                    totalPrice: Number(service.price)
                 });
 
                 toast.success("Booking request sent! The vendor will review it shortly.");
@@ -511,7 +511,7 @@ const ServiceDetailsPage = () => {
                     {/* RIGHT COLUMN: Sticky Booking Widget (Desktop) */}
                     <div className="hidden lg:block lg:col-span-5 xl:col-span-4">
                         <div className="sticky top-28">
-                            <div className="bg-white/80 backdrop-blur-xl border border-white shadow-2xl shadow-indigo-900/5 rounded-[2rem] p-8 before:absolute before:inset-0 before:ring-1 before:ring-slate-900/5 before:rounded-[2rem] relative z-10">
+                            <div className="bg-white/80 backdrop-blur-xl border border-white shadow-2xl shadow-indigo-900/5 rounded-[2rem] p-8 before:absolute before:inset-0 before:pointer-events-none before:ring-1 before:ring-slate-900/5 before:rounded-[2rem] relative z-10">
                                 <h3 className="text-xl font-bold text-slate-900 mb-6 tracking-tight flex items-center gap-2">
                                     <Calendar className="w-5 h-5 text-indigo-600" /> Book Assignment
                                 </h3>
