@@ -96,11 +96,13 @@ const DashboardLayout = ({ children, user }: DashboardLayoutProps) => {
             >
                 {/* Brand / Logo */}
                 <div className="h-20 flex items-center justify-between px-8 shrink-0 bg-[#0B1120]/50 backdrop-blur-xl border-b border-white/5 relative z-10">
-                    <Link to="/" className="flex items-center gap-3 group">
-                        <div className="h-9 w-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform ring-1 ring-white/10">
-                            <Sparkles className="h-5 w-5 text-white" />
+                    <Link to="/" className="flex items-center gap-2 group">
+                        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-105 transition-transform">
+                            <span className="text-white font-bold text-lg">E</span>
                         </div>
-                        <span className="text-lg font-black tracking-wider text-white">E-KARIGAR</span>
+                        <span className="text-xl font-bold tracking-tight text-white group-hover:text-indigo-400 transition-colors uppercase">
+                            -Karigar
+                        </span>
                     </Link>
                     <button
                         onClick={() => setIsSidebarOpen(false)}

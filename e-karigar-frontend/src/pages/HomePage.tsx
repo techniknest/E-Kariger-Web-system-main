@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
     Search,
@@ -38,10 +38,35 @@ const staggerContainer = {
 const HomePage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [location, setLocation] = useState("");
+    const [user, setUser] = useState<any>(null);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const checkAuth = () => {
+            const userStr = localStorage.getItem("user");
+            if (userStr) {
+                try {
+                    setUser(JSON.parse(userStr));
+                } catch (e) {
+                    setUser(null);
+                }
+            } else {
+                setUser(null);
+            }
+        };
+        checkAuth();
+        window.addEventListener("auth-change", checkAuth);
+        return () => window.removeEventListener("auth-change", checkAuth);
+    }, []);
 
     const handleSearch = () => {
         navigate(`/services?query=${searchQuery}&location=${location}`);
+    };
+
+    const getPartnerLink = () => {
+        if (!user) return "/register?type=vendor";
+        if (user.role === "VENDOR") return "/vendor/dashboard";
+        return "/become-vendor";
     };
 
     return (
@@ -247,7 +272,7 @@ const HomePage = () => {
                                 Connect with your ideal clientele, manage bookings effortlessly, and grow your revenue securely. Join the elite network today.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                                <Link to="/register?type=vendor" className="bg-indigo-600 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-500 transition-all flex justify-center items-center gap-2">
+                                <Link to={getPartnerLink()} className="bg-indigo-600 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-500 transition-all flex justify-center items-center gap-2">
                                     Become a Partner <ArrowRight className="h-4 w-4" />
                                 </Link>
                                 <Link to="/about" className="px-8 py-3.5 text-white font-semibold hover:bg-white/5 transition-colors border border-slate-700 hover:border-slate-600 rounded-xl flex justify-center items-center">
