@@ -82,29 +82,39 @@ export class AdminService {
           select: { name: true, email: true, phone: true },
         },
         services: true,
-        reviews_received: {
-          select: { rating: true },
-        },
-        vendor_bookings: {
-          where: { status: 'COMPLETED' },
-          select: { id: true }
-        }
       },
       orderBy: { created_at: 'desc' },
     });
 
-    return vendors.map(vendor => {
-      const reviews = vendor.reviews_received;
-      const totalReviews = reviews.length;
-      const averageRating = totalReviews > 0
-        ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10) / 10
-        : 0;
+    if (vendors.length === 0) return [];
+    
+    const vendorIds = vendors.map(v => v.id);
 
+    const [ratings, completedJobs] = await Promise.all([
+      this.prisma.review.groupBy({
+        by: ['vendor_id'],
+        where: { vendor_id: { in: vendorIds } },
+        _avg: { rating: true },
+        _count: { rating: true }
+      }),
+      this.prisma.booking.groupBy({
+        by: ['vendor_id'],
+        where: { vendor_id: { in: vendorIds }, status: 'COMPLETED' },
+        _count: { id: true }
+      })
+    ]);
+
+    const ratingsMap = new Map(ratings.map(r => [r.vendor_id, { avg: r._avg.rating || 0, count: r._count.rating }]));
+    const jobsMap = new Map(completedJobs.map(j => [j.vendor_id, j._count.id]));
+
+    return vendors.map(vendor => {
+      const ratingInfo = ratingsMap.get(vendor.id) || { avg: 0, count: 0 };
+      
       return {
         ...vendor,
-        averageRating,
-        totalReviews,
-        completedJobsCount: vendor.vendor_bookings.length
+        averageRating: Math.round(ratingInfo.avg * 10) / 10,
+        totalReviews: ratingInfo.count,
+        completedJobsCount: jobsMap.get(vendor.id) || 0
       };
     });
   }
@@ -165,30 +175,28 @@ export class AdminService {
       include: {
         user: {
           select: { name: true, email: true, phone: true }
-        },
-        reviews_received: {
-          select: { rating: true }
-        },
-        vendor_bookings: {
-          select: { 
-            id: true, 
-            status: true, 
-            final_price: true, 
-            total_price: true 
-          }
         }
       }
     });
 
     if (!vendor) throw new NotFoundException('Vendor not found');
 
-    const totalReviews = vendor.reviews_received.length;
-    const averageRating = totalReviews > 0
-      ? Math.round((vendor.reviews_received.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10) / 10
-      : 0;
+    const [reviewAgg, completedBookings] = await Promise.all([
+      this.prisma.review.aggregate({
+        where: { vendor_id: vendorId },
+        _avg: { rating: true },
+        _count: { rating: true }
+      }),
+      this.prisma.booking.findMany({
+        where: { vendor_id: vendorId, status: 'COMPLETED' },
+        select: { final_price: true, total_price: true }
+      })
+    ]);
 
-    const completedBookings = vendor.vendor_bookings.filter(b => b.status === 'COMPLETED');
+    const totalReviews = reviewAgg._count.rating || 0;
+    const averageRating = Math.round((reviewAgg._avg.rating || 0) * 10) / 10;
     const completedBookingsCount = completedBookings.length;
+    
     const totalRevenue = completedBookings.reduce((sum, b) => {
       const price = b.final_price || b.total_price;
       return sum + (price ? Number(price) : 0);
@@ -199,7 +207,7 @@ export class AdminService {
       averageRating,
       totalReviews,
       completedBookingsCount,
-      totalRevenue: Math.round(totalRevenue * 100) / 100 // ensure 2 decimal places max
+      totalRevenue: Math.round(totalRevenue * 100) / 100
     };
   }
 
@@ -261,22 +269,45 @@ export class AdminService {
 
   // 11. Get All Suspended Vendors
   async getSuspendedVendors() {
-    return this.prisma.vendorProfile.findMany({
+    const vendors = await this.prisma.vendorProfile.findMany({
       where: { approval_status: VendorVerificationStatus.SUSPENDED },
       include: {
-        user: {
-          select: { name: true, email: true, phone: true },
-        },
+        user: { select: { name: true, email: true, phone: true } },
         services: true,
-        reviews_received: {
-          select: { rating: true },
-        },
-        vendor_bookings: {
-          where: { status: 'COMPLETED' },
-          select: { id: true }
-        }
       },
       orderBy: { updated_at: 'desc' },
+    });
+
+    if (vendors.length === 0) return [];
+    
+    const vendorIds = vendors.map(v => v.id);
+
+    const [ratings, completedJobs] = await Promise.all([
+      this.prisma.review.groupBy({
+        by: ['vendor_id'],
+        where: { vendor_id: { in: vendorIds } },
+        _avg: { rating: true },
+        _count: { rating: true }
+      }),
+      this.prisma.booking.groupBy({
+        by: ['vendor_id'],
+        where: { vendor_id: { in: vendorIds }, status: 'COMPLETED' },
+        _count: { id: true }
+      })
+    ]);
+
+    const ratingsMap = new Map(ratings.map(r => [r.vendor_id, { avg: r._avg.rating || 0, count: r._count.rating }]));
+    const jobsMap = new Map(completedJobs.map(j => [j.vendor_id, j._count.id]));
+
+    return vendors.map(vendor => {
+      const ratingInfo = ratingsMap.get(vendor.id) || { avg: 0, count: 0 };
+      
+      return {
+        ...vendor,
+        averageRating: Math.round(ratingInfo.avg * 10) / 10,
+        totalReviews: ratingInfo.count,
+        completedJobsCount: jobsMap.get(vendor.id) || 0
+      };
     });
   }
 }
