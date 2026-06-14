@@ -112,6 +112,7 @@ export class BookingsService {
             include: {
                 service: true,
                 client: { select: { name: true, email: true, phone: true } },
+                review: true,
             },
             orderBy: { created_at: 'desc' },
         });
@@ -203,8 +204,8 @@ export class BookingsService {
             throw new ForbiddenException('You are not authorized to revise this quote');
         }
 
-        if (booking.status !== BookingStatus.ACCEPTED && booking.status !== BookingStatus.IN_PROGRESS) {
-            throw new BadRequestException('Price can only be revised when the booking is ACCEPTED or IN_PROGRESS');
+        if (booking.status !== BookingStatus.IN_PROGRESS) {
+            throw new BadRequestException('Price can only be revised when the booking is IN_PROGRESS (after arrival)');
         }
 
         const updatedBooking = await this.prisma.booking.update({

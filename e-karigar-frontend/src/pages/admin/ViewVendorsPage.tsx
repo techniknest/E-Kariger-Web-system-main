@@ -72,16 +72,30 @@ const ViewVendorsPage = () => {
   );
 
   const renderStars = (rating: number = 0) => {
+    if (rating === 0) {
+      return (
+        <div className="flex items-center gap-1">
+          <Star className="h-3.5 w-3.5 text-slate-300" />
+          <span className="text-sm font-bold text-slate-900">—</span>
+        </div>
+      );
+    }
+    
+    const isLowRating = rating < 3.0;
+    
     return (
-      <div className="flex items-center gap-1">
-        <Star
-          className={`h-3.5 w-3.5 ${
-            rating > 0 ? "fill-amber-400 text-amber-400" : "text-slate-300"
-          }`}
-        />
-        <span className="text-sm font-bold text-slate-900">
-          {rating > 0 ? rating.toFixed(1) : "—"}
-        </span>
+      <div className="flex flex-col gap-1">
+        <div className={`flex items-center gap-1.5 ${isLowRating ? 'text-red-600' : 'text-slate-900'}`}>
+          <Star className={`h-3.5 w-3.5 ${isLowRating ? 'fill-red-500 text-red-500' : 'fill-amber-400 text-amber-400'}`} />
+          <span className="text-sm font-bold">
+            {rating.toFixed(1)}
+          </span>
+        </div>
+        {isLowRating && (
+          <span className="text-[10px] font-black text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded-md uppercase tracking-wider inline-block w-max mt-0.5">
+            Warning: Low Rating
+          </span>
+        )}
       </div>
     );
   };
@@ -382,8 +396,8 @@ const ViewVendorsPage = () => {
                       <Briefcase className="h-3 w-3" />{" "}
                       {vendor.completedJobsCount || 0} jobs
                     </span>
-                    <span className="text-xs text-slate-500 flex items-center gap-1">
-                      <Star className="h-3 w-3 fill-amber-400 text-amber-400" />{" "}
+                    <span className={`text-xs font-bold flex items-center gap-1 ${vendor.averageRating && vendor.averageRating < 3.0 ? 'text-red-600 bg-red-50 px-2 py-0.5 rounded-full' : 'text-slate-500'}`}>
+                      <Star className={`h-3 w-3 ${vendor.averageRating && vendor.averageRating < 3.0 ? 'fill-red-500 text-red-500' : 'fill-amber-400 text-amber-400'}`} />{" "}
                       {vendor.averageRating?.toFixed(1) || "—"}
                     </span>
                   </div>
@@ -444,11 +458,11 @@ const ViewVendorsPage = () => {
                       Jobs
                     </p>
                   </div>
-                  <div className="text-center border-x border-slate-100">
-                    <p className="text-base font-black text-slate-900">
+                  <div className={`text-center border-x border-slate-100 flex flex-col items-center justify-center ${vendor.averageRating && vendor.averageRating < 3.0 ? 'bg-red-50 rounded-lg py-1' : ''}`}>
+                    <p className={`text-base font-black ${vendor.averageRating && vendor.averageRating < 3.0 ? 'text-red-600' : 'text-slate-900'}`}>
                       {vendor.averageRating?.toFixed(1) || "—"}
                     </p>
-                    <p className="text-[10px] text-slate-400 font-semibold uppercase">
+                    <p className={`text-[10px] font-semibold uppercase ${vendor.averageRating && vendor.averageRating < 3.0 ? 'text-red-600' : 'text-slate-400'}`}>
                       Rating
                     </p>
                   </div>

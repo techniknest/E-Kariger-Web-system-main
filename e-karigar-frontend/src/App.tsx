@@ -17,6 +17,8 @@ import ProfilePage from "./pages/ProfilePage";
 import VendorDetailsAdmin from "./pages/admin/VendorDetailsAdmin";
 import BookingHistoryPage from "./pages/BookingHistoryPage";
 import EarningsPage from "./pages/EarningsPage";
+import ClientSettingsPage from "./pages/client/ClientSettingsPage";
+import ClientMessagesPage from "./pages/client/ClientMessagesPage";
 
 // Security Wrapper: Checks if token exists before showing protected pages
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
@@ -82,7 +84,9 @@ function App() {
           <Route index element={<Navigate to="/client/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="history" element={<BookingHistoryPage />} />
-          <Route path="settings" element={<PlaceholderPage />} />
+          <Route path="settings" element={<ClientSettingsPage />} />
+          <Route path="messages" element={<ClientMessagesPage />} />
+          <Route path="onboarding" element={<BecomeVendorPage />} />
         </Route>
 
         {/* Vendor Dashboard */}

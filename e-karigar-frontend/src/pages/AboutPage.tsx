@@ -171,13 +171,13 @@ const AboutPage = () => {
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl font-bold text-slate-900 ">Meet the Minds</h2>
-                        <p className="mt-4 text-slate-500 font-medium">The leadership team working to redefine local services.</p>
+                        <p className="mt-4 text-slate-500 font-medium">The leadership team working to redefine local services. <br /> Powered by <span className="font-bold text-indigo-600">TechnikNest pvt Ltd</span></p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-5xl mx-auto">
                         {[
                             { name: "Sarah Ahmed", role: "CEO & Co-Founder", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
-                            { name: "Ali Raza", role: "CTO", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+                            { name: "Ahsan Naseer", role: "CTO", img: "/ahsan_naseer.jpg" },
                             { name: "Zainab Khan", role: "Head of Operations", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
                         ].map((member, index) => (
                             <motion.div

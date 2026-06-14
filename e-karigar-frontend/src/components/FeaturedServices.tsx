@@ -22,6 +22,10 @@ interface Service {
         };
         city: string;
     };
+    vendorRating?: {
+        averageRating: number;
+        totalReviews: number;
+    };
 }
 
 const FeaturedServices = () => {
@@ -47,12 +51,6 @@ const FeaturedServices = () => {
         fetchServices();
     }, []);
 
-    const getDummyRating = (id: string) => {
-        const charCode = id.charCodeAt(id.length - 1) || 0;
-        const rating = (4.5 + (charCode % 5) / 10).toFixed(1);
-        const reviews = 20 + (charCode % 100);
-        return { rating, reviews };
-    };
 
     const fallbackServices: Service[] = [
         {
@@ -133,7 +131,7 @@ const FeaturedServices = () => {
                     {displayServices.map((service, idx) => {
                         const ratingInfo = isFallback
                             ? { rating: (4.8 + (idx % 3) * 0.1).toFixed(1), reviews: 80 + idx * 15 }
-                            : getDummyRating(service.id);
+                            : { rating: (service.vendorRating?.averageRating || 0).toFixed(1), reviews: service.vendorRating?.totalReviews || 0 };
 
                         const { rating, reviews } = ratingInfo;
                         const imageUrl = service.images && service.images.length > 0
@@ -147,7 +145,7 @@ const FeaturedServices = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true, margin: "-50px" }}
                                 transition={{ delay: idx * 0.1 }}
-                                className="group card flex flex-col h-full cursor-pointer hover:border-indigo-200"
+                                className="group card flex flex-col h-full cursor-pointer hover:border-indigo-200 relative"
                                 onClick={() => navigate(isFallback ? '/services' : `/services/${service.id}`)}
                             >
                                 {/* Image Container */}
@@ -181,11 +179,20 @@ const FeaturedServices = () => {
                                     
                                     {/* Rating */}
                                     <div className="flex items-center gap-1.5 mb-4 mt-1">
-                                        <div className="flex items-center gap-1 bg-amber-50 px-1.5 py-0.5 rounded text-amber-700">
-                                            <Star className="w-3.5 h-3.5 fill-current" />
-                                            <span className="font-bold text-xs">{rating}</span>
-                                        </div>
-                                        <span className="text-[11px] text-slate-500 font-medium">({reviews} reviews)</span>
+                                        {reviews > 0 ? (
+                                            <>
+                                                <div className="flex items-center gap-1 bg-amber-50 px-1.5 py-0.5 rounded text-amber-700">
+                                                    <Star className="w-3.5 h-3.5 fill-current" />
+                                                    <span className="font-bold text-xs">{rating}</span>
+                                                </div>
+                                                <span className="text-[11px] text-slate-500 font-medium">({reviews} reviews)</span>
+                                            </>
+                                        ) : (
+                                            <div className="flex items-center gap-1 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">
+                                                <Star className="w-3.5 h-3.5 text-slate-300" />
+                                                <span className="font-bold text-xs text-slate-500">New</span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Footer Section */}

@@ -258,6 +258,14 @@ const JobRequestManager = () => {
                   <p className="text-[10px] text-orange-800 font-medium">Waiting for client to approve revised price</p>
                 </div>
               )}
+
+              {booking.status === "COMPLETED" && booking.review && (
+                <div className="flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-[10px] text-amber-800 font-bold uppercase tracking-wide flex items-center gap-1.5">
+                     ⭐ Client Rated: {booking.review.rating} / 5
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Card Footer (Actions) */}
@@ -283,20 +291,12 @@ const JobRequestManager = () => {
               )}
 
               {booking.status === "ACCEPTED" && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => { setOtpModal(booking.id); setOtpValue(""); setOtpError(""); }}
-                    className="flex-1 py-2 px-3 rounded-lg bg-indigo-700 text-white hover:bg-indigo-800 font-medium text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm"
-                  >
-                    <Play className="h-3.5 w-3.5" /> Enter OTP to Start
-                  </button>
-                  <button
-                    onClick={() => { setReviseModal(booking.id); setNewPrice(""); setReviseReason(""); }}
-                    className="py-2 px-3 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-medium text-xs transition-colors flex items-center justify-center gap-1.5"
-                  >
-                    <DollarSign className="h-3.5 w-3.5" /> Revise
-                  </button>
-                </div>
+                <button
+                  onClick={() => { setOtpModal(booking.id); setOtpValue(""); setOtpError(""); }}
+                  className="w-full py-2 px-3 rounded-lg bg-indigo-700 text-white hover:bg-indigo-800 font-medium text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <Play className="h-3.5 w-3.5" /> Enter OTP to Start
+                </button>
               )}
 
               {booking.status === "IN_PROGRESS" && (

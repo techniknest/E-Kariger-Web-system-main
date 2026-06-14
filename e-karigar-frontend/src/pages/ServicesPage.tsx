@@ -23,6 +23,10 @@ interface Service {
     category?: {
         name: string;
     };
+    vendorRating?: {
+        averageRating: number;
+        totalReviews: number;
+    };
 }
 
 const ServicesPage = () => {
@@ -78,12 +82,6 @@ const ServicesPage = () => {
         setSearchParams(newParams);
     };
 
-    const getDummyRating = (id: string) => {
-        const charCode = id.charCodeAt(id.length - 1) || 0;
-        const rating = (4.5 + (charCode % 5) / 10).toFixed(1);
-        const reviews = 20 + (charCode % 100);
-        return { rating, reviews };
-    };
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
@@ -147,7 +145,8 @@ const ServicesPage = () => {
                 ) : filteredServices.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {filteredServices.map((service, idx) => {
-                            const { rating, reviews } = getDummyRating(service.id);
+                            const rating = service.vendorRating?.averageRating || 0;
+                            const reviews = service.vendorRating?.totalReviews || 0;
                             
                             return (
                             <motion.div
@@ -184,11 +183,20 @@ const ServicesPage = () => {
                                         <h3 className="text-lg font-bold text-slate-900 mb-1 line-clamp-1 group-hover:text-indigo-600 transition-colors tracking-tight ">{service.title}</h3>
                                         
                                         <div className="flex items-center gap-1.5 mb-2 mt-1">
-                                            <div className="flex items-center gap-1 bg-amber-50 px-1.5 py-0.5 rounded text-amber-700">
-                                                <Star className="w-3.5 h-3.5 fill-current" />
-                                                <span className="font-bold text-xs">{rating}</span>
-                                            </div>
-                                            <span className="text-[11px] text-slate-500 font-medium">({reviews} reviews)</span>
+                                            {reviews > 0 ? (
+                                                <>
+                                                    <div className="flex items-center gap-1 bg-amber-50 px-1.5 py-0.5 rounded text-amber-700">
+                                                        <Star className="w-3.5 h-3.5 fill-current" />
+                                                        <span className="font-bold text-xs">{rating.toFixed(1)}</span>
+                                                    </div>
+                                                    <span className="text-[11px] text-slate-500 font-medium">({reviews} reviews)</span>
+                                                </>
+                                            ) : (
+                                                <div className="flex items-center gap-1 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">
+                                                    <Star className="w-3.5 h-3.5 text-slate-300" />
+                                                    <span className="font-bold text-xs text-slate-500">New</span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <p className="text-sm text-slate-500 line-clamp-2 h-10 mb-4">{service.description}</p>
