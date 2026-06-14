@@ -17,7 +17,8 @@ import {
     TrendingUp,
     ChevronRight,
     Search,
-    Sparkles
+    Sparkles,
+    MessageSquare
 } from "lucide-react";
 
 import NotificationsDropdown from "../components/NotificationsDropdown";
@@ -60,10 +61,12 @@ const DashboardLayout = ({ children, user }: DashboardLayoutProps) => {
     ];
 
     const clientLinks = [
-        { name: "My Dashboard", icon: LayoutGrid, path: "/client/dashboard", category: "MAIN", colorClass: "text-indigo-400" },
-        { name: "Past Bookings", icon: History, path: "/client/history", category: "RECORDS", colorClass: "text-violet-400" },
-        { name: "Preferences", icon: Settings2, path: "/client/settings", category: "ACCOUNT", colorClass: "text-slate-400" },
-        { name: "Exit to Home", icon: Home, path: "/", category: "ACCOUNT", colorClass: "text-slate-500" },
+        { name: "Dashboard", icon: LayoutGrid, path: "/client/dashboard", category: "MAIN MENU", colorClass: "text-indigo-400" },
+        { name: "Booking History", icon: History, path: "/client/history", category: "MAIN MENU", colorClass: "text-violet-400" },
+        { name: "Messages", icon: MessageSquare, path: "/client/messages", category: "MAIN MENU", colorClass: "text-blue-400" },
+        { name: "Settings", icon: Settings2, path: "/client/settings", category: "ACCOUNT PREFERENCES", colorClass: "text-slate-400" },
+        { name: "Become a Pro", icon: Briefcase, path: "/become-vendor", category: "ACCOUNT PREFERENCES", colorClass: "text-amber-400" },
+        { name: "Exit to Home", icon: Home, path: "/", category: "BOTTOM PINNED", colorClass: "text-slate-500" },
     ];
 
     const rawLinks = isAdmin ? adminLinks : (isVendor ? vendorLinks : clientLinks);

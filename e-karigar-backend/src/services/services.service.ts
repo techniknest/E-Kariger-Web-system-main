@@ -7,7 +7,7 @@ export class ServicesService {
   constructor(private prisma: PrismaService) { }
 
   async findAll() {
-    return this.prisma.service.findMany({
+    const services = await this.prisma.service.findMany({
       where: { 
         is_active: true,
         vendor: {
@@ -17,11 +17,29 @@ export class ServicesService {
       include: {
         vendor: {
           include: {
-            user: { select: { name: true } }
+            user: { select: { name: true } },
+            reviews_received: { select: { rating: true } }
           }
         },
         category: true,
       },
+    });
+
+    return services.map(service => {
+      const reviews = service.vendor.reviews_received;
+      const totalReviews = reviews.length;
+      const averageRating = totalReviews > 0
+        ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10) / 10
+        : 0;
+
+      // Exclude the raw reviews_received array from the payload to save bandwidth
+      const { reviews_received, ...vendorWithoutReviews } = service.vendor;
+
+      return {
+        ...service,
+        vendor: vendorWithoutReviews,
+        vendorRating: { averageRating, totalReviews }
+      };
     });
   } // 1. Public: Get All Services (For Homepage)
 
