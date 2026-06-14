@@ -49,6 +49,7 @@ model VendorProfile {
   verification_records VerificationRecord[]
 
   @@map("vendor_profiles")
+  @@index([approval_status])
 }
 
 model Category {
@@ -76,6 +77,8 @@ model Service {
   vendor      VendorProfile @relation(fields: [vendor_id], references: [id])
 
   @@map("services")
+  @@index([is_active])
+  @@index([vendor_id])
 }
 
 model Booking {
@@ -102,6 +105,9 @@ model Booking {
   review              Review?
 
   @@map("bookings")
+  @@index([vendor_id])
+  @@index([client_id])
+  @@index([status])
 }
 
 model BookingStatusLog {
@@ -151,6 +157,7 @@ model Review {
   vendor     VendorProfile @relation(fields: [vendor_id], references: [id])
 
   @@map("reviews")
+  @@index([vendor_id])
 }
 
 model VerificationRecord {

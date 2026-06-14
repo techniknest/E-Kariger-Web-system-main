@@ -18,27 +18,35 @@ export class ServicesService {
         vendor: {
           include: {
             user: { select: { name: true } },
-            reviews_received: { select: { rating: true } }
           }
         },
         category: true,
       },
     });
 
+    if (services.length === 0) return [];
+
+    const vendorIds = Array.from(new Set(services.map(s => s.vendor_id)));
+
+    const ratings = await this.prisma.review.groupBy({
+      by: ['vendor_id'],
+      where: { vendor_id: { in: vendorIds } },
+      _avg: { rating: true },
+      _count: { rating: true }
+    });
+
+    const ratingsMap = new Map(ratings.map(r => [
+      r.vendor_id, 
+      { avg: r._avg.rating || 0, count: r._count.rating }
+    ]));
+
     return services.map(service => {
-      const reviews = service.vendor.reviews_received;
-      const totalReviews = reviews.length;
-      const averageRating = totalReviews > 0
-        ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10) / 10
-        : 0;
-
-      // Exclude the raw reviews_received array from the payload to save bandwidth
-      const { reviews_received, ...vendorWithoutReviews } = service.vendor;
-
+      const ratingInfo = ratingsMap.get(service.vendor_id) || { avg: 0, count: 0 };
+      const averageRating = Math.round(ratingInfo.avg * 10) / 10;
+      
       return {
         ...service,
-        vendor: vendorWithoutReviews,
-        vendorRating: { averageRating, totalReviews }
+        vendorRating: { averageRating, totalReviews: ratingInfo.count }
       };
     });
   } // 1. Public: Get All Services (For Homepage)

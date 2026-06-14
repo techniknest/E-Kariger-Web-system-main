@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminApi } from "../../services/api";
+import { adminApi, reviewsApi } from "../../services/api";
 import {
   ChevronLeft,
   Calendar,
@@ -49,6 +49,12 @@ const VendorDetailsAdmin = () => {
   const { data: bookings = [], isLoading: bookingsLoading } = useQuery({
     queryKey: ["adminVendorBookings", id],
     queryFn: () => adminApi.getVendorBookingsAdmin(id!),
+    enabled: !!id,
+  });
+
+  const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
+    queryKey: ["adminVendorReviews", id],
+    queryFn: () => reviewsApi.getVendorReviews(id!),
     enabled: !!id,
   });
 
@@ -756,6 +762,63 @@ const VendorDetailsAdmin = () => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </div>
+
+          {/* Reviews Section */}
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mt-6">
+            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-amber-500" />
+                <h3 className="text-sm font-bold text-slate-900">
+                  Client Reviews
+                </h3>
+              </div>
+              <span className="text-xs font-black text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
+                {reviews.length} total
+              </span>
+            </div>
+
+            {reviewsLoading ? (
+               <div className="p-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-indigo-500" /></div>
+            ) : reviews.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <Star className="h-12 w-12 text-slate-200" />
+                <p className="text-slate-600 font-bold">No reviews yet</p>
+                <p className="text-xs text-slate-400">
+                  This vendor hasn't received any reviews.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {reviews.map((review: any) => (
+                  <div key={review.id} className="p-5 hover:bg-slate-50/50 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                          {review.client?.name?.charAt(0) || "U"}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-900">{review.client?.name || "Unknown Client"}</p>
+                          <p className="text-[10px] text-slate-400">
+                             {new Date(review.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className={`h-4 w-4 ${i < review.rating ? "fill-amber-400 text-amber-400" : "fill-slate-100 text-slate-200"}`} />
+                        ))}
+                      </div>
+                    </div>
+                    {review.comment && (
+                      <p className="text-sm text-slate-600 mt-3 italic pl-10 border-l-2 border-slate-100 ml-4">
+                        "{review.comment}"
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </div>
